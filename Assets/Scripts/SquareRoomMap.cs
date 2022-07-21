@@ -168,6 +168,23 @@ namespace SquareRoom
                 }
             }
 
+            foreach (SquareSpaceInfo cur in space_list)
+            {
+                for (int i = cur.start_y; i < cur.end_y; i++)
+                {
+                    for (int j = cur.start_x; j < cur.end_x; j++)
+                    {
+                        if (map[i, j] == 4)
+                        {
+                            if (map[i + 1, j] != 2 && map[i - 1, j] != 2 && map[i, j + 1] != 2 && map[i, j - 1] != 2) //주변에 wall이 없으면 문을 없앰
+                            {
+                                map[i, j] = 1;
+                            }
+                        }
+                    }
+                }
+            }
+
             return map;
         }
 
@@ -194,7 +211,7 @@ namespace SquareRoom
 
         private List<SquareSpaceInfo> DivideRect(SquareSpaceInfo cur, bool vertical)
         {
-            if (cur.end_x - cur.start_x < 15 || cur.end_y - cur.start_y < 15) return new List<SquareSpaceInfo>();
+            if (cur.end_x - cur.start_x < 20 || cur.end_y - cur.start_y < 20) return new List<SquareSpaceInfo>();
 
             List<SquareSpaceInfo> arr1 = new List<SquareSpaceInfo>();
             List<SquareSpaceInfo> arr2 = new List<SquareSpaceInfo>();
