@@ -105,14 +105,14 @@ public class GameSystemManager : MonoBehaviour
             else if(touch.phase == TouchPhase.Ended)
             {
                 float touch_interval = Time.time - touch_began_time;
-                if(touch_interval < 0.1f)
+                if(touch_interval < 0.2f)
                 {
                     Debug.Log("touch_interval short");
                     if (cur_path.Count > 0) cur_path = new List<(int, int)>(); //이동중에 누르면 이동 취소
                     else // 누르면 그 방향으로 이동
                     {
                         Vector3 touch_pos = Camera.main.ScreenToWorldPoint(touch.position);
-                        touch_pos = new Vector3((int)touch_pos.x, (int)touch_pos.y, 0);
+                        touch_pos = new Vector3((int)(touch_pos.x + 0.3f), (int)(touch_pos.y + 0.3f), 0); //보정치 0.3f 더해주면 좀 더 터치가 정확해짐
                         Debug.Log("touch x, y : " + touch_pos.x + ", " + touch_pos.y);
 
 
