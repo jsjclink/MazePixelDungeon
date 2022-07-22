@@ -12,6 +12,7 @@ public class CameraMove : MonoBehaviour
     [SerializeField]
     GameObject player;
 
+    //for drag
     private float Speed = 0.5f;
     private Vector2 nowPos, prePos;
     private Vector3 movePos;
@@ -28,7 +29,7 @@ public class CameraMove : MonoBehaviour
             else if(touch.phase == TouchPhase.Moved)
             {
                 nowPos = touch.position - touch.deltaPosition;
-                movePos = (Vector3)(prePos - nowPos) * Time.deltaTime * Speed;
+                movePos = (Vector3)(prePos - nowPos) * Time.deltaTime * Speed * (cam.orthographicSize/20); //카메라 확대했을 때는 드래그 속도 줄여줌
                 cam.transform.Translate(movePos); 
                 prePos = touch.position - touch.deltaPosition;
             }
