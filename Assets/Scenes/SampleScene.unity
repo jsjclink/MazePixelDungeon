@@ -341,6 +341,7 @@ MonoBehaviour:
   wall_prefab: {fileID: 3221364860796858949, guid: 49e2246ec68d8704a90e126e101d6ca2, type: 3}
   bridge_prefab: {fileID: 4567168210757365970, guid: 2a89e80202b904442ac4988e28cbb76b, type: 3}
   door_prefab: {fileID: 8065170049285674915, guid: ed9d7b159cdfefe45b16c5c767450bb9, type: 3}
+  stair_prefab: {fileID: 4038738027710592003, guid: 3f9dd024e8d255f44bac16cfc4b2fffb, type: 3}
   player: {fileID: 1054705958}
   cam: {fileID: 519420031}
 --- !u!114 &1602366393
