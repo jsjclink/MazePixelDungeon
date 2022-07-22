@@ -50,7 +50,12 @@ public class CameraMove : MonoBehaviour
             if (cam.orthographic)
             {
                 cam.orthographicSize += deltaMagnitudeDiff * orthoZoomSpeed;
-                cam.orthographicSize = Mathf.Max(cam.orthographicSize, 0.1f);
+
+                float camsize = cam.orthographicSize;
+                if (camsize > 30.0f) camsize = 30.0f;
+                if (camsize < 5.0f) camsize = 5.0f;
+
+                cam.orthographicSize = camsize;
             }
             else
             {

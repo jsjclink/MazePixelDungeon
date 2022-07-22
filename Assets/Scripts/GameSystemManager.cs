@@ -28,11 +28,19 @@ public class GameSystemManager : MonoBehaviour
     [SerializeField]
     Camera cam;
 
-    float touch_interval = 0.0f;
+    //float touch_interval = 0.0f;
+    float touch_began_time;
+    float prev_action_time;
     int[,] cur_map;
+    int[,] cur_observed; // 나중에 MapInfo에 저장되어있어야 함
+
+    List<(int, int)> cur_path = new List<(int, int)>();
 
     void Start()
     {
+        Application.targetFrameRate = 20; // 배터리 최적화
+        prev_action_time = Time.time;
+
         int width = 70; int height = 70;
 
         SquareRoomMap square_room_map = new SquareRoomMap(width, height, new MapOption(15, (2, 2, 2, 2)));
@@ -63,39 +71,51 @@ public class GameSystemManager : MonoBehaviour
 
     private void Update()
     {
+        if(cur_path.Count > 0)
+        {
+            float action_interval = Time.time - prev_action_time;
+            if(action_interval > 0.2f)
+            {
+                (int, int) cur = cur_path[0];
+                int x = cur.Item1;
+                int y = cur.Item2;
+                cur_path.RemoveAt(0);
+                player.transform.position = new Vector3(x, y, 0);
+
+                prev_action_time = Time.time;
+            }
+        }
+
         if (Input.touchCount == 1)
         {
-            touch_interval += Time.deltaTime;
-
             Touch touch = Input.GetTouch(0);
 
             if (touch.phase == TouchPhase.Began)
             {
-                touch_interval = 0.0f;
+                touch_began_time = Time.time;
             }
             else if(touch.phase == TouchPhase.Ended)
             {
+                float touch_interval = Time.time - touch_began_time;
                 if(touch_interval < 0.1f)
                 {
                     Debug.Log("touch_interval short");
-                    Vector3 touch_pos = Camera.main.ScreenToWorldPoint(touch.position);
-                    touch_pos = new Vector3((int)touch_pos.x, (int)touch_pos.y, 0);
-                    Debug.Log("touch x, y : " + touch_pos.x + ", " + touch_pos.y);
-                    List<(int, int)> path = CalculatePath(player.transform.position, touch_pos, cur_map);
-                    if(path.Count > 0)
-                    {
-                        Debug.Log("path length : " + path.Count);
-                        foreach((int, int) cur in path)
-                        {
-                            int x = cur.Item1;
-                            int y = cur.Item2;
-                            Instantiate(wall_prefab, new Vector3(x, y, 0), Quaternion.identity);
-                        }
-                        player.transform.position = touch_pos;
-                    }
+                    if (cur_path.Count > 0) cur_path = new List<(int, int)>();
                     else
                     {
-                        Debug.Log("path zero");
+                        Vector3 touch_pos = Camera.main.ScreenToWorldPoint(touch.position);
+                        touch_pos = new Vector3((int)touch_pos.x, (int)touch_pos.y, 0);
+                        Debug.Log("touch x, y : " + touch_pos.x + ", " + touch_pos.y);
+                        List<(int, int)> path = CalculatePath(player.transform.position, touch_pos, cur_map);
+                        if (path.Count > 0)
+                        {
+                            Debug.Log("path length : " + path.Count);
+                            cur_path = path;
+                        }
+                        else
+                        {
+                            Debug.Log("path zero");
+                        }
                     }
                 }
                 else
@@ -160,6 +180,8 @@ public class GameSystemManager : MonoBehaviour
 
         (int, int) cur_pt = ((int)to.x, (int)to.y);
         if (prev[(int)to.y, (int)to.x] == (-1, -1)) return path_arr;
+
+        Stack<(int, int)> tmp = new Stack<(int, int)>();
         while (true)
         {
             int x = cur_pt.Item1;
@@ -167,8 +189,12 @@ public class GameSystemManager : MonoBehaviour
             if (x == -1 || y == -1) break;
             if ((x, y) == ((int)from.x, (int)from.y)) break;
 
-            path_arr.Add(cur_pt);
+            tmp.Push(cur_pt);
             cur_pt = prev[y, x];
+        }
+        while(tmp.Count > 0)
+        {
+            path_arr.Add(tmp.Pop());
         }
         return path_arr;
     }
