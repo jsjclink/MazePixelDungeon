@@ -2,15 +2,42 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum TERRAIN_TYPE
+{
+    EMPTY, FLOOR, WALL, BRIDGE, DOOR, STAIR
+}
+public enum TOUCH_INPUT_TYPE
+{
+    NONE, MOVE_INTERRUPT, PLAYER_MOVE_TO_POS, PLAYER_ENTER_STAIR
+}
+
+public class TouchInfo
+{
+    public TOUCH_INPUT_TYPE type;
+    public Vector3 move_to_pos;
+    public MapInfo from;
+    public MapInfo to;
+
+    public TouchInfo(TOUCH_INPUT_TYPE type) //none, move_interrupt
+    {
+        this.type = type;
+    }
+    public TouchInfo(TOUCH_INPUT_TYPE type, MapInfo from, MapInfo to) //player_enter_stair
+    {
+        this.type = type;
+        this.from = from;
+        this.to = to;
+    }
+    public TouchInfo(TOUCH_INPUT_TYPE type, Vector3 touch_pos)
+    {
+        this.type = type;
+        this.move_to_pos = touch_pos;
+    }
+}
+
+
 public class GameSystemManager : MonoBehaviour
 {
-    const int EMPTY = 0;
-    const int FLOOR = 1;
-    const int WALL = 2;
-    const int BRIDGE = 3;
-    const int DOOR = 4;
-    const int STAIR = 5;
-
     [SerializeField]
     GameObject empty_prefab;
     [SerializeField]
@@ -25,20 +52,24 @@ public class GameSystemManager : MonoBehaviour
     GameObject stair_prefab;
 
     [SerializeField]
-    GameObject player;
+    GameObject enemy_crab_prefab;
+
+    [SerializeField]
+    GameObject player_object;
 
     [SerializeField]
     Camera cam;
 
-    List<GameObject> terrain_list = new List<GameObject>();
-
     float touch_began_time;
     float prev_action_time;
 
-    MapInfo cur_mapInfo;
-    int[,] cur_map;
+    PlayerInfo playerInfo;
 
-    List<(int, int)> cur_path = new List<(int, int)>();
+    MapInfo cur_mapInfo;
+    int[,] map_arr;
+    List<GameObject> terrain_list = new List<GameObject>();
+    List<EnemyInfo> enemy_list = new List<EnemyInfo>();
+    Dictionary<EnemyInfo, GameObject> enemy_object_dict = new Dictionary<EnemyInfo, GameObject>();
 
     Dungeon dungeon;
 
@@ -49,220 +80,155 @@ public class GameSystemManager : MonoBehaviour
 
         int difficulty = 3;
         dungeon = new Dungeon(difficulty);
+        playerInfo = new PlayerInfo();
 
-        cur_mapInfo = dungeon.hierarchy_list[0].mapInfos_of_layer[1][0];
+        MapInfo root = dungeon.hierarchy_list[0].mapInfos_of_layer[0][0];
+        MapInfo first_map = dungeon.hierarchy_list[0].mapInfos_of_layer[1][0];
 
-        cur_map = ((SquareRoomMapInfo)cur_mapInfo).GetMapArr();
-
-        for (int i = 0; i < cur_map.GetLength(0); i++)
-        {
-            for (int j = 0; j < cur_map.GetLength(1); j++)
-            {
-                if (cur_map[i, j] == EMPTY) terrain_list.Add(Instantiate(empty_prefab, new Vector3(j, i, 0), Quaternion.identity));
-                else if (cur_map[i, j] == FLOOR) terrain_list.Add(Instantiate(floor_prefab, new Vector3(j, i, 0), Quaternion.identity));
-                else if (cur_map[i, j] == WALL) terrain_list.Add(Instantiate(wall_prefab, new Vector3(j, i, 0), Quaternion.identity));
-                else if (cur_map[i, j] == BRIDGE) terrain_list.Add(Instantiate(bridge_prefab, new Vector3(j, i, 0), Quaternion.identity));
-                else if (cur_map[i, j] == DOOR) terrain_list.Add(Instantiate(door_prefab, new Vector3(j, i, 0), Quaternion.identity));
-                else if (cur_map[i, j] == STAIR) terrain_list.Add(Instantiate(stair_prefab, new Vector3(j, i, 0), Quaternion.identity));
-            }
-        }
-
-        List<SquareSpaceInfo> space_list = ((SquareRoomMapInfo)cur_mapInfo).space_list;
-        int idx = Random.Range(0, space_list.Count);
-        int spawn_x = Random.Range(space_list[idx].start_x+1, space_list[idx].end_x-1);
-        int spawn_y = Random.Range(space_list[idx].start_y+1, space_list[idx].end_y-1);
-
-        player.transform.position = new Vector3(spawn_x, spawn_y, 0);
-
-        cam.transform.position = new Vector3(player.transform.position.x, player.transform.position.y, -10);
+        ChangeMap(root, first_map);
     }
 
     private void Update()
     {
-        if(cur_path.Count > 0)
+        //get input
+        TouchInfo touch_info = GetTouch();
+
+        //update info - by touch_info
+        switch (touch_info.type)
+        {
+            case TOUCH_INPUT_TYPE.NONE:
+                break;
+            case TOUCH_INPUT_TYPE.MOVE_INTERRUPT:
+                playerInfo.cur_path.Clear();
+                break;
+            case TOUCH_INPUT_TYPE.PLAYER_MOVE_TO_POS:
+                playerInfo.SetPathTo((int)touch_info.move_to_pos.x, (int)touch_info.move_to_pos.y, map_arr, enemy_list);
+                break;
+            case TOUCH_INPUT_TYPE.PLAYER_ENTER_STAIR:
+                ChangeMap(touch_info.from, touch_info.to);
+                break;
+        }
+
+        //update info - every 0.1f sec (by turn)
+        if (playerInfo.cur_path.Count > 0)
         {
             float action_interval = Time.time - prev_action_time;
-            if(action_interval > 0.2f)
+            if (action_interval > 0.1f)
             {
-                (int, int) cur = cur_path[0];
-                int x = cur.Item1;
-                int y = cur.Item2;
-                cur_path.RemoveAt(0);
-                player.transform.position = new Vector3(x, y, 0);
+                //player move
+                if(playerInfo.DetectObstacle(playerInfo.cur_path[0].Item1, playerInfo.cur_path[0].Item2, enemy_list))
+                {
+                    playerInfo.cur_path.Clear();
+                }
+                else
+                {
+                    playerInfo.SetPos(playerInfo.cur_path[0].Item1, playerInfo.cur_path[0].Item2);
+                    playerInfo.cur_path.RemoveAt(0);
+                }
+                
+                //enemy move
+                foreach(EnemyInfo enemy in enemy_list)
+                {
+                    if(enemy.DetectPlayer(playerInfo, map_arr))
+                    {
+                        enemy.SetPathTo(playerInfo.pos_x, playerInfo.pos_y, map_arr, enemy_list, playerInfo);
+                        if(enemy.cur_path.Count > 0)
+                        {
+                            if (enemy.DetectObstacle(enemy.cur_path[0].Item1, enemy.cur_path[0].Item2, enemy_list, playerInfo))
+                            {
+                                enemy.SetPathTo(playerInfo.pos_x, playerInfo.pos_y, map_arr, enemy_list, playerInfo);
+                            }
+                            else
+                            {
+                                enemy.SetPos(enemy.cur_path[0].Item1, enemy.cur_path[0].Item2);
+                                enemy.cur_path.RemoveAt(0);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if(enemy.cur_path.Count > 0)
+                        {
+                            if (enemy.DetectObstacle(enemy.cur_path[0].Item1, enemy.cur_path[0].Item2, enemy_list, playerInfo))
+                            {
+                                enemy.SetPathTo(enemy.cur_path[enemy.cur_path.Count -1].Item1, enemy.cur_path[enemy.cur_path.Count - 1].Item2, map_arr, enemy_list, playerInfo);
+                            }
+                            else
+                            {
+                                enemy.SetPos(enemy.cur_path[0].Item1, enemy.cur_path[0].Item2);
+                                enemy.cur_path.RemoveAt(0);
+                            }
+                        }
+                        else
+                        {
+                            List<SquareSpaceInfo> space_list = ((SquareRoomMapInfo)cur_mapInfo).space_list;
+                            int idx = Random.Range(0, space_list.Count);
+                            int move_x = Random.Range(space_list[idx].start_x + 1, space_list[idx].end_x - 1);
+                            int move_y = Random.Range(space_list[idx].start_y + 1, space_list[idx].end_y - 1);
+                            enemy.SetPathTo(move_x, move_y, map_arr, enemy_list, playerInfo);
+                        }
+                    }
+                }
 
                 prev_action_time = Time.time;
             }
         }
 
-        if (Input.touchCount == 1)
+        //draw
+        player_object.transform.position = new Vector3(playerInfo.pos_x, playerInfo.pos_y, 0);
+        foreach(EnemyInfo enemy in enemy_list)
         {
-            Touch touch = Input.GetTouch(0);
-
-            if (touch.phase == TouchPhase.Began)
-            {
-                touch_began_time = Time.time;
-            }
-            else if(touch.phase == TouchPhase.Ended)
-            {
-                float touch_interval = Time.time - touch_began_time;
-                if(touch_interval < 0.2f)
-                {
-                    Debug.Log("touch_interval short");
-                    if (cur_path.Count > 0) cur_path = new List<(int, int)>(); //이동중에 누르면 이동 취소
-                    else // 누르면 그 방향으로 이동
-                    {
-                        Vector3 touch_pos = Camera.main.ScreenToWorldPoint(touch.position);
-                        touch_pos = new Vector3((int)(touch_pos.x + 0.3f), (int)(touch_pos.y + 0.3f), 0); //보정치 0.3f 더해주면 좀 더 터치가 정확해짐
-                        Debug.Log("touch x, y : " + touch_pos.x + ", " + touch_pos.y);
-
-
-                        if((int)player.transform.position.x == (int)touch_pos.x && (int)player.transform.position.y == (int)touch_pos.y) //날 누른거면
-                        {
-                            if (cur_map[(int)touch_pos.y, (int)touch_pos.x] == STAIR) //근데 stair임
-                            {
-                                foreach(StairInfo cur in cur_mapInfo.stair_list)
-                                {
-                                    if(cur.pos_x == (int)touch_pos.x && cur.pos_y == (int)touch_pos.y) // 해당하는 stair를 찾음
-                                    {
-                                        ChangeMap(cur.connected_map);
-                                    }
-                                }
-                            }
-                        }
-                        else // 날 누른게 아니면
-                        {
-                            List<(int, int)> path = CalculatePath(player.transform.position, touch_pos, cur_map);
-                            if (path.Count > 0)
-                            {
-                                Debug.Log("path length : " + path.Count);
-                                cur_path = path;
-                            }
-                            else
-                            {
-                                Debug.Log("path zero");
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    Debug.Log("touch_interval long");
-                }
-            }
+            enemy_object_dict[enemy].transform.position = new Vector3(enemy.pos_x, enemy.pos_y, 0);
         }
     }
 
-    private List<(int, int)> CalculatePath(Vector3 from, Vector3 to, int[,] map)
+
+    private void ChangeMap(MapInfo from, MapInfo to)
     {
-        int height = map.GetLength(0); int width = map.GetLength(1);
-        int[] dx = { 0, 0, 1, -1 };
-        int[] dy = { 1, -1, 0, 0 };
-
-        List<(int, int)> path_arr = new List<(int, int)>();
-
-        if (map[(int)to.y, (int)to.x] == EMPTY || map[(int)to.y, (int)to.x] == WALL) return path_arr;
-
-        bool[,] visited = new bool[height, width];
-        for (int i = 0; i < height; i++)
-        {
-            for (int j = 0; j < width; j++)
-            {
-                if (map[i, j] == EMPTY || map[i, j] == WALL) visited[i, j] = true;
-                else visited[i, j] = false;
-            }
-        }
-        visited[(int)from.y, (int)from.x] = true;
-
-        (int, int)[,] prev = new (int, int)[height, width];
-        for(int i = 0; i < height; i++)
-        {
-            for(int j = 0; j < width; j++)
-            {
-                prev[i, j] = (-1, -1);
-            }
-        }
-
-        Queue<(int, int)> queue = new Queue<(int, int)>();
-        queue.Enqueue(((int)from.x, (int)from.y));
-
-        while(queue.Count > 0)
-        {
-            (int, int) cur = queue.Dequeue();
-            int x = cur.Item1;
-            int y = cur.Item2;
-
-            for(int i = 0; i < 4; i++)
-            {
-                int next_x = x + dx[i];
-                int next_y = y + dy[i];
-                if(next_x >= 0 && next_x < width && next_y >= 0 && next_y < height && !visited[next_y, next_x])
-                {
-                    visited[next_y, next_x] = true;
-                    queue.Enqueue((next_x, next_y));
-                    prev[next_y, next_x] = (x, y);
-                }
-            }
-        }
-
-        (int, int) cur_pt = ((int)to.x, (int)to.y);
-        if (prev[(int)to.y, (int)to.x] == (-1, -1)) return path_arr;
-
-        Stack<(int, int)> tmp = new Stack<(int, int)>();
-        while (true)
-        {
-            int x = cur_pt.Item1;
-            int y = cur_pt.Item2;
-            if (x == -1 || y == -1) break;
-            if ((x, y) == ((int)from.x, (int)from.y)) break;
-
-            tmp.Push(cur_pt);
-            cur_pt = prev[y, x];
-        }
-        while(tmp.Count > 0)
-        {
-            path_arr.Add(tmp.Pop());
-        }
-        return path_arr;
-    }
-
-    private void ChangeMap(MapInfo to) //여기서는 원래 맵 에서 새로운 맵으로 이동한거임
-    {
-        foreach(GameObject cur in terrain_list)
+        //이전 정보 삭제
+        foreach (GameObject cur in this.terrain_list)
         {
             Destroy(cur);
         }
-
-        MapInfo tmp = cur_mapInfo;
-
-        cur_mapInfo = to;
-        Debug.Log("from.h, from.l, from.m index: " + tmp.hierarchy_idx + ", " + tmp.layer_idx + ", " + tmp.map_idx);
-        Debug.Log("to.h, to.l, to.m index: " + to.hierarchy_idx + ", " + to.layer_idx + ", " + to.map_idx);
-
-        cur_map = ((SquareRoomMapInfo)cur_mapInfo).GetMapArr();
-
-        for (int i = 0; i < cur_map.GetLength(0); i++)
+        this.terrain_list.Clear();
+        foreach(EnemyInfo cur in this.enemy_list)
         {
-            for (int j = 0; j < cur_map.GetLength(1); j++)
+            Destroy(enemy_object_dict[cur]);
+        }
+        this.enemy_list = new List<EnemyInfo>();
+        this.enemy_object_dict = new Dictionary<EnemyInfo, GameObject>();
+
+        //정보 init
+        (int[,], List<EnemyInfo>) infos = ((SquareRoomMapInfo)to).GetMapInfos();
+        this.cur_mapInfo = to;
+        this.map_arr = infos.Item1;
+        this.enemy_list = infos.Item2;
+
+        //draw terrain
+        for (int i = 0; i < this.map_arr.GetLength(0); i++)
+        {
+            for (int j = 0; j < this.map_arr.GetLength(1); j++)
             {
-                if (cur_map[i, j] == EMPTY) terrain_list.Add(Instantiate(empty_prefab, new Vector3(j, i, 0), Quaternion.identity));
-                else if (cur_map[i, j] == FLOOR) terrain_list.Add(Instantiate(floor_prefab, new Vector3(j, i, 0), Quaternion.identity));
-                else if (cur_map[i, j] == WALL) terrain_list.Add(Instantiate(wall_prefab, new Vector3(j, i, 0), Quaternion.identity));
-                else if (cur_map[i, j] == BRIDGE) terrain_list.Add(Instantiate(bridge_prefab, new Vector3(j, i, 0), Quaternion.identity));
-                else if (cur_map[i, j] == DOOR) terrain_list.Add(Instantiate(door_prefab, new Vector3(j, i, 0), Quaternion.identity));
-                else if (cur_map[i, j] == STAIR) terrain_list.Add(Instantiate(stair_prefab, new Vector3(j, i, 0), Quaternion.identity));
+                if (this.map_arr[i, j] == (int)TERRAIN_TYPE.EMPTY) terrain_list.Add(Instantiate(empty_prefab, new Vector3(j, i, 0), Quaternion.identity));
+                else if (this.map_arr[i, j] == (int)TERRAIN_TYPE.FLOOR) terrain_list.Add(Instantiate(floor_prefab, new Vector3(j, i, 0), Quaternion.identity));
+                else if (this.map_arr[i, j] == (int)TERRAIN_TYPE.WALL) terrain_list.Add(Instantiate(wall_prefab, new Vector3(j, i, 0), Quaternion.identity));
+                else if (this.map_arr[i, j] == (int)TERRAIN_TYPE.BRIDGE) terrain_list.Add(Instantiate(bridge_prefab, new Vector3(j, i, 0), Quaternion.identity));
+                else if (this.map_arr[i, j] == (int)TERRAIN_TYPE.DOOR) terrain_list.Add(Instantiate(door_prefab, new Vector3(j, i, 0), Quaternion.identity));
+                else if (this.map_arr[i, j] == (int)TERRAIN_TYPE.STAIR) terrain_list.Add(Instantiate(stair_prefab, new Vector3(j, i, 0), Quaternion.identity));
             }
         }
 
+        //이동한 star 위치에 player위치
         StairInfo target_stair = null;
-        foreach(StairInfo s in cur_mapInfo.stair_list)
+        foreach (StairInfo cur in this.cur_mapInfo.stair_list)
         {
-            Debug.Log("s.connected_map.id:" + s.connected_map.id);
-            if (s.connected_map.id == tmp.id)
-            {
-                target_stair = s;
-            }
+            if (cur.connected_map.id == from.id) target_stair = cur;
         }
-        if (target_stair != null) player.transform.position = new Vector3(target_stair.pos_x, target_stair.pos_y, 0);
+        if (target_stair != null)
+        {
+            playerInfo.SetPos(target_stair.pos_x, target_stair.pos_y);
+            player_object.transform.position = new Vector3(playerInfo.pos_x, target_stair.pos_y, 0);
+        }
         else //일어나면 안되는 일!
         {
             Debug.Log("Fatal error : stair find failure");
@@ -270,9 +236,61 @@ public class GameSystemManager : MonoBehaviour
             int idx = Random.Range(0, space_list.Count);
             int spawn_x = Random.Range(space_list[idx].start_x + 1, space_list[idx].end_x - 1);
             int spawn_y = Random.Range(space_list[idx].start_y + 1, space_list[idx].end_y - 1);
-            player.transform.position = new Vector3(spawn_x, spawn_y, 0);
+            playerInfo.SetPos(spawn_x, spawn_y);
+            player_object.transform.position = new Vector3(spawn_x, spawn_y, 0);
         }
 
-        cam.transform.position = new Vector3(player.transform.position.x, player.transform.position.y, -10);
+        //draw enemies
+        foreach (EnemyInfo cur in this.enemy_list)
+        {
+           enemy_object_dict[cur] = Instantiate(enemy_crab_prefab, new Vector3(cur.pos_x, cur.pos_y, 0), Quaternion.identity);
+        }
+
+        cam.transform.position = new Vector3(playerInfo.pos_x, playerInfo.pos_y, -10);
+    }
+
+    private TouchInfo GetTouch()
+    {
+        TouchInfo touch_info = new TouchInfo(TOUCH_INPUT_TYPE.NONE);
+
+        if (Input.touchCount == 1)
+        {
+            Touch touch = Input.GetTouch(0);
+            if (touch.phase == TouchPhase.Began)
+            {
+                touch_began_time = Time.time;
+            }
+            else if (touch.phase == TouchPhase.Ended)
+            {
+                float touch_interval = Time.time - touch_began_time;
+                if (touch_interval >= 0.2f) return new TouchInfo(TOUCH_INPUT_TYPE.NONE); // touch interval 짧으면 NONE return함
+
+                if (playerInfo.cur_path.Count > 0) return new TouchInfo(TOUCH_INPUT_TYPE.MOVE_INTERRUPT); //이동중에 누르면 이동 취소
+                else
+                {
+                    Vector3 touch_pos = Camera.main.ScreenToWorldPoint(touch.position);
+                    touch_pos = new Vector3(touch_pos.x + 0.3f, touch_pos.y + 0.3f, 0); //보정치 0.3f 더해주면 좀 더 터치가 정확해짐
+
+                    if (playerInfo.pos_x == (int)touch_pos.x && playerInfo.pos_y == (int)touch_pos.y)
+                    {
+                        if (map_arr[(int)touch_pos.y, (int)touch_pos.x] == (int)TERRAIN_TYPE.STAIR)
+                        {
+                            foreach (StairInfo cur in cur_mapInfo.stair_list)
+                            {
+                                if (cur.pos_x == (int)touch_pos.x && cur.pos_y == (int)touch_pos.y) // 해당하는 stair를 찾음
+                                {
+                                    return new TouchInfo(TOUCH_INPUT_TYPE.PLAYER_ENTER_STAIR, this.cur_mapInfo, cur.connected_map);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        return new TouchInfo(TOUCH_INPUT_TYPE.PLAYER_MOVE_TO_POS, touch_pos);
+                    }
+                }
+            }
+        }
+        return touch_info;
     }
 }

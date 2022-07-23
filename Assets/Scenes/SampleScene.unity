@@ -265,8 +265,8 @@ SpriteRenderer:
   m_SortingLayerID: -1922174513
   m_SortingLayer: 1
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 1, g: 0.8171741, b: 0, a: 1}
+  m_Sprite: {fileID: 1949621811, guid: 9de0c6455aeeff048aa53e0b508579c9, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -342,7 +342,8 @@ MonoBehaviour:
   bridge_prefab: {fileID: 4567168210757365970, guid: 2a89e80202b904442ac4988e28cbb76b, type: 3}
   door_prefab: {fileID: 8065170049285674915, guid: ed9d7b159cdfefe45b16c5c767450bb9, type: 3}
   stair_prefab: {fileID: 4038738027710592003, guid: 3f9dd024e8d255f44bac16cfc4b2fffb, type: 3}
-  player: {fileID: 1054705958}
+  enemy_crab_prefab: {fileID: 2215931942538672318, guid: bd9c9c4a065f4b3429c15c3fdbf680c1, type: 3}
+  player_object: {fileID: 1054705958}
   cam: {fileID: 519420031}
 --- !u!114 &1602366393
 MonoBehaviour:

@@ -19,6 +19,7 @@ public class MapInfo
     public List<BridgeInfo> bridge_list;
 
     //ป๓ลย
+    public List<EnemyInfo> enemy_list;
     public bool visited;
 
     public MapInfo(int hierarchy_idx, int layer_idx, int map_idx, int width, int height)
@@ -36,6 +37,7 @@ public class MapInfo
         stair_list = new List<StairInfo>();
         bridge_list = new List<BridgeInfo>();
 
+        this.enemy_list = new List<EnemyInfo>();
         this.visited = false;
     }
 }

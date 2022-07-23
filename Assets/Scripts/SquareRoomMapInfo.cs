@@ -35,10 +35,12 @@ public class SquareRoomMapInfo : MapInfo
 
         this.bridge_list = ConnectRectSpace(); // bridge list 만듦
 
+        this.enemy_list = CreateEnemies(); //enemy 생성
+
         //star_list도 만들어야함 -> dungeon.cs에서 만듦 왜냐하면 hierarchy, layer 연결 다 끝나야 그걸 연결하는 stair를 만드니까
     }
 
-    public int[,] GetMapArr()
+    private int[,] GetMapArr()
     {
         int[,] map = new int[height, width];
         for (int i = 0; i < height; i++)
@@ -120,9 +122,14 @@ public class SquareRoomMapInfo : MapInfo
         return map;
     }
 
+    public (int[,], List<EnemyInfo>) GetMapInfos()
+    {
+        return (GetMapArr(), this.enemy_list);
+    }
+
     private List<SquareSpaceInfo> DivideRect(SquareSpaceInfo cur, bool vertical)
     {
-        if (cur.end_x - cur.start_x < 20 || cur.end_y - cur.start_y < 20) return new List<SquareSpaceInfo>();
+        if (cur.end_x - cur.start_x < 15 || cur.end_y - cur.start_y < 15) return new List<SquareSpaceInfo>();
 
         List<SquareSpaceInfo> arr1 = new List<SquareSpaceInfo>();
         List<SquareSpaceInfo> arr2 = new List<SquareSpaceInfo>();
@@ -233,6 +240,19 @@ public class SquareRoomMapInfo : MapInfo
         }
 
         return bridge_list;
+    }
+
+    private List<EnemyInfo> CreateEnemies()
+    {
+        List<EnemyInfo> enemy_list = new List<EnemyInfo>();
+        for (int i = 0; i < 10; i++)
+        {
+            int idx = Random.Range(0, space_list.Count);
+            int spawn_x = Random.Range(space_list[idx].start_x + 1, space_list[idx].end_x - 1);
+            int spawn_y = Random.Range(space_list[idx].start_y + 1, space_list[idx].end_y - 1);
+            enemy_list.Add(new EnemyInfo(spawn_x, spawn_y));
+        }
+        return enemy_list;
     }
 
     public void CreateStairs()
