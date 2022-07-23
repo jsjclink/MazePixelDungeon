@@ -4,37 +4,31 @@ using UnityEngine;
 
 
 
-public class EnemyInfo{
-
+public class PlayerInfo: UnitInfo{
+    public int hp = 100;
     public int pos_x;
     public int pos_y;
-    public int hp;
 
     public List<(int, int)> cur_path;
 
-    public EnemyInfo(int x, int y)
+    public EnemyInfo engaging_unit;
+
+    public PlayerInfo()
     {
-        this.pos_x = x;
-        this.pos_y = y;
-        cur_path = new List<(int, int)>();
+        this.unit_type = UNIT_TYPE.PLAYER;
+        this.cur_path = new List<(int, int)>();
+        this.unit_state = UNIT_STATE.IDLE;
     }
     public void SetPos(int x, int y)
     {
         this.pos_x = x;
         this.pos_y = y;
     }
-    public bool DetectPlayer(PlayerInfo playerInfo, int[,] map)
-    {
-        int dx = playerInfo.pos_x - this.pos_x;
-        int dy = playerInfo.pos_y - this.pos_y;
-        if (dx * dx + dy * dy < 20) return true;
-        else return false;
-    }
-    public void SetPathTo(int target_x, int target_y, int[,] map, List<EnemyInfo> enemy_list, PlayerInfo playerInfo)
+    public void SetPathTo(int target_x, int target_y, int[,] map, List<EnemyInfo> enemy_list)
     {
         int height = map.GetLength(0); int width = map.GetLength(1);
-        int[] dx = { 0, 1, 1, 1, 0, -1, -1, -1 };
-        int[] dy = { 1, 1, 0, -1, -1, -1, 0, 1 };
+        int[] dx = {0, 1, 1, 1, 0, -1, -1, -1};
+        int[] dy = {1, 1, 0, -1, -1, -1, 0, 1};
 
         this.cur_path = new List<(int, int)>();
 
@@ -49,11 +43,10 @@ public class EnemyInfo{
                 else visited[i, j] = false;
             }
         }
-        foreach (EnemyInfo enemy in enemy_list)
+        foreach(EnemyInfo enemy in enemy_list)
         {
             visited[enemy.pos_y, enemy.pos_x] = true;
         }
-        if(target_x != playerInfo.pos_x || target_y != playerInfo.pos_y) visited[playerInfo.pos_y, playerInfo.pos_x] = true;
         visited[this.pos_y, this.pos_x] = true;
 
         (int, int)[,] prev = new (int, int)[height, width];
@@ -105,16 +98,22 @@ public class EnemyInfo{
         {
             this.cur_path.Add(tmp.Pop());
         }
-        this.cur_path.RemoveAt(this.cur_path.Count - 1);
     }
-    public bool DetectObstacle(int target_x, int target_y, List<EnemyInfo> enemy_list, PlayerInfo playerInfo)
+    public bool DetectObstacle(int target_x, int target_y, List<EnemyInfo> enemy_list)
     {
-        foreach(EnemyInfo enemy in enemy_list)
+        foreach (EnemyInfo enemy in enemy_list)
         {
             if (target_x == enemy.pos_x && target_y == enemy.pos_y) return true;
         }
-        if (target_x == playerInfo.pos_x && target_y == playerInfo.pos_y) return true;
-
         return false;
+    }
+    public void SetState(UNIT_STATE unit_state)
+    {
+        this.unit_state = unit_state;
+    }
+    public void SetState(UNIT_STATE unit_state, EnemyInfo enemy)
+    {
+        this.unit_state = unit_state;
+        this.engaging_unit = enemy;
     }
 }
