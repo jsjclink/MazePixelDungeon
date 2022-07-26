@@ -20,6 +20,7 @@ public class MapInfo
 
     //ป๓ลย
     public List<EnemyInfo> enemy_list;
+    public TerrainInfo[, ] terrain_info_arr;
     public bool visited;
 
     public MapInfo(int hierarchy_idx, int layer_idx, int map_idx, int width, int height)
@@ -38,6 +39,7 @@ public class MapInfo
         bridge_list = new List<BridgeInfo>();
 
         this.enemy_list = new List<EnemyInfo>();
+        this.terrain_info_arr = new TerrainInfo[height, width];
         this.visited = false;
     }
 }

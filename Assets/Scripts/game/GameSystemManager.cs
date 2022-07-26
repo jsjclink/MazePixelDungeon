@@ -2,11 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using LitJson;
+using System.IO;
+using System;
 
-public enum TERRAIN_TYPE
-{
-    EMPTY, FLOOR, WALL, BRIDGE, DOOR, STAIR
-}
+
 public enum TOUCH_INPUT_TYPE
 {
     NONE, MOVE_INTERRUPT, PLAYER_MOVE_TO_POS, PLAYER_ENTER_STAIR, PLAYER_ATTACK_ENEMY
@@ -16,6 +16,54 @@ public enum TURN_TYPE
     ENEMY_TURN, PLAYER_TURN
 }
 
+[Serializable]
+public class SaveData
+{
+    [Serializable]
+    public class EnemySerializedList
+    {
+        public List<EnemyInfo> enemy_serialized_list;
+        public EnemySerializedList()
+        {
+            enemy_serialized_list = new List<EnemyInfo>();
+        }
+    }
+    [Serializable]
+    public class SeedInfo
+    {
+        public int seed;
+        public SeedInfo(int seed)
+        {
+            this.seed = seed;
+        }
+    }
+
+    public PlayerInfo player_info;
+    public EnemySerializedList enemySerialized;
+    public SeedInfo seedInfo;
+
+    public SaveData(Dungeon dungeon, int seed, PlayerInfo player_info)
+    {
+        this.enemySerialized = new EnemySerializedList();
+        this.seedInfo = new SeedInfo(seed);
+        this.player_info = player_info;
+
+        foreach (HierarchyInfo hierarchy in dungeon.hierarchy_list)
+        {
+            foreach(List<MapInfo> map_linfo_list in hierarchy.mapInfos_of_layer)
+            {
+                foreach(MapInfo map_info in map_linfo_list)
+                {
+                    foreach(EnemyInfo enemy in map_info.enemy_list)
+                    {
+                        this.enemySerialized.enemy_serialized_list.Add(enemy);
+                    }
+                }
+            }
+        }
+    }
+
+}
 public class TouchInfo
 {
     public TOUCH_INPUT_TYPE type;
@@ -67,11 +115,17 @@ public class GameSystemManager : MonoBehaviour
     [SerializeField]
     GameObject wall_prefab;
     [SerializeField]
+    GameObject wall_left_prefab;
+    [SerializeField]
+    GameObject wall_right_prefab;
+    [SerializeField]
     GameObject bridge_prefab;
     [SerializeField]
     GameObject door_prefab;
     [SerializeField]
     GameObject stair_prefab;
+    [SerializeField]
+    GameObject shadow_prefab;
 
     [SerializeField]
     GameObject enemy_crab_prefab;
@@ -85,33 +139,38 @@ public class GameSystemManager : MonoBehaviour
     float touch_began_time;
     float prev_action_time;
 
-    PlayerInfo playerInfo;
-
-    MapInfo cur_mapInfo;
-    int[,] map_arr;
-    List<GameObject> terrain_list = new List<GameObject>();
-    List<EnemyInfo> enemy_list = new List<EnemyInfo>();
-    Dictionary<EnemyInfo, GameObject> enemy_object_dict = new Dictionary<EnemyInfo, GameObject>();
-
-    Queue<TurnInfo> turn_queue = new Queue<TurnInfo>();
-
     Dungeon dungeon;
+    PlayerInfo player_info;
 
-    int cnt = 0;
+    MapInfo cur_map_info;
+    TerrainInfo[,] terrain_info_arr;
+    GameObject[,] terrain_object_arr;
+    GameObject[,] shadow_object_arr;
+    List<EnemyInfo> enemy_list;
+    Dictionary<EnemyInfo, GameObject> enemy_object_dict;
+
+    Queue<TurnInfo> turn_queue;
+
+    int game_idx;
 
     void Start()
     {
-        Application.targetFrameRate = 20; // 배터리 최적화
+        turn_queue = new Queue<TurnInfo>();
         prev_action_time = Time.time;
 
-        int difficulty = 3;
-        dungeon = new Dungeon(difficulty);
-        playerInfo = new PlayerInfo();
+        Application.targetFrameRate = 20; // 배터리 최적화
 
-        MapInfo root = dungeon.hierarchy_list[0].mapInfos_of_layer[0][0];
-        MapInfo first_map = dungeon.hierarchy_list[0].mapInfos_of_layer[1][0];
+        //앞에 씬에서 받아옴
+        game_idx = 1;
+        bool game_loaded = false;
 
-        ChangeMap(root, first_map);
+        //InitGame에서 해줌
+        //terrain_info_arr = new TerrainInfo[0, 0];
+        //terrain_object_arr = new GameObject[0, 0];
+        //shadow_object_arr = new GameObject[0, 0];
+        //enemy_list = new List<EnemyInfo>();
+        //enemy_object_dict = new Dictionary<EnemyInfo, GameObject>();
+        InitGame(game_loaded, game_idx);
     }
 
     private void Update()
@@ -125,28 +184,29 @@ public class GameSystemManager : MonoBehaviour
             case TOUCH_INPUT_TYPE.NONE:
                 break;
             case TOUCH_INPUT_TYPE.MOVE_INTERRUPT:
-                playerInfo.cur_path.Clear();
-                playerInfo.SetState(UNIT_STATE.IDLE);
+                this.player_info.cur_path.Clear();
+                this.player_info.SetState(UNIT_STATE.IDLE);
                 break;
             case TOUCH_INPUT_TYPE.PLAYER_MOVE_TO_POS:
-                playerInfo.SetPathTo((int)touch_info.move_to_pos.x, (int)touch_info.move_to_pos.y, map_arr, enemy_list);
-                if(playerInfo.cur_path.Count != 0)
+                this.player_info.SetPathTo((int)touch_info.move_to_pos.x, (int)touch_info.move_to_pos.y, this.terrain_info_arr, enemy_list);
+                Debug.Log("CUR PATH COUNT !!!!! : " + player_info.cur_path.Count);
+                if(this.player_info.cur_path.Count != 0)
                 {
-                    playerInfo.SetState(UNIT_STATE.MOVING);
-                    if (turn_queue.Count == 0) turn_queue.Enqueue(new TurnInfo(TURN_TYPE.PLAYER_TURN, playerInfo));
+                    this.player_info.SetState(UNIT_STATE.MOVING);
+                    if (turn_queue.Count == 0) turn_queue.Enqueue(new TurnInfo(TURN_TYPE.PLAYER_TURN, this.player_info));
                 }
                 else
                 {
-                    playerInfo.SetState(UNIT_STATE.IDLE);
+                    this.player_info.SetState(UNIT_STATE.IDLE);
                 }   
                 break;
             case TOUCH_INPUT_TYPE.PLAYER_ENTER_STAIR:
                 ChangeMap(touch_info.from, touch_info.to);
-                playerInfo.SetState(UNIT_STATE.IDLE);
+                this.player_info.SetState(UNIT_STATE.IDLE);
                 break;
             case TOUCH_INPUT_TYPE.PLAYER_ATTACK_ENEMY:
-                playerInfo.SetState(UNIT_STATE.ENGAGING, touch_info.enemy);
-                if (turn_queue.Count == 0) turn_queue.Enqueue(new TurnInfo(TURN_TYPE.PLAYER_TURN, playerInfo));
+                this.player_info.SetState(UNIT_STATE.ENGAGING, touch_info.enemy);
+                if (turn_queue.Count == 0) turn_queue.Enqueue(new TurnInfo(TURN_TYPE.PLAYER_TURN, this.player_info));
                 break;
         }
 
@@ -157,188 +217,279 @@ public class GameSystemManager : MonoBehaviour
             if (action_interval > 0.2f)
             {
                 List<EnemyInfo> turn_used_enemy_list = new List<EnemyInfo>();
-
                 //ENGAGE
                 TurnInfo turn_info = turn_queue.Dequeue();
                 switch (turn_info.turn_type)
                 {
                     case TURN_TYPE.PLAYER_TURN:
+                        Debug.Log(2);
                         Debug.Log("turn_queue.Count : " + turn_queue.Count);
-                        if (playerInfo.unit_state == UNIT_STATE.IDLE || playerInfo.unit_state == UNIT_STATE.SLEEPING) break;
-                        switch (playerInfo.unit_state)
+                        if (this.player_info.unit_state == UNIT_STATE.IDLE || this.player_info.unit_state == UNIT_STATE.SLEEPING) break;
+                        switch (this.player_info.unit_state)
                         {
                             case UNIT_STATE.IDLE:
                                 break;
                             case UNIT_STATE.MOVING:
-                                Debug.Log("cur_path.count : " + playerInfo.cur_path.Count);
-                                if (playerInfo.DetectObstacle(playerInfo.cur_path[0].Item1, playerInfo.cur_path[0].Item2, enemy_list))
+                                Debug.Log("cur_path.count : " + this.player_info.cur_path.Count);
+                                if(this.player_info.cur_path.Count > 0)
                                 {
-                                    playerInfo.cur_path.Clear();
-                                }
-                                else
-                                {
-                                    playerInfo.SetPos(playerInfo.cur_path[0].Item1, playerInfo.cur_path[0].Item2);
-                                    playerInfo.cur_path.RemoveAt(0);
-                                }
-                                if (playerInfo.cur_path.Count == 0) playerInfo.SetState(UNIT_STATE.IDLE);
+                                    if (this.player_info.DetectObstacle(this.player_info.cur_path[0].Item1, this.player_info.cur_path[0].Item2, enemy_list))
+                                    {
+                                        this.player_info.cur_path.Clear();
+                                    }
+                                    else
+                                    {
+                                        this.player_info.SetPos(this.player_info.cur_path[0].Item1, this.player_info.cur_path[0].Item2);
+                                        this.player_info.cur_path.RemoveAt(0);
+                                    }
+                                }      
+                                if(this.player_info.cur_path.Count == 0) this.player_info.SetState(UNIT_STATE.IDLE);
                                 break;
                             case UNIT_STATE.ENGAGING:
                                 Debug.Log("ATTACKED ENEMY");
-                                playerInfo.SetState(UNIT_STATE.IDLE);
+
+                                this.player_info.SetState(UNIT_STATE.IDLE);
                                 break;
                             case UNIT_STATE.SLEEPING:
                                 break;
                         }
-
                         foreach (EnemyInfo enemy in enemy_list)
                         {
                             bool contains = false;
                             foreach (UnitInfo e in turn_used_enemy_list) if (e == enemy) contains = true;
                             if (contains) continue;
-                            int dx = playerInfo.pos_x - (int)enemy.pos_x;
-                            int dy = playerInfo.pos_y - (int)enemy.pos_y;
+                            int dx = this.player_info.pos_x - (int)enemy.pos_x;
+                            int dy = this.player_info.pos_y - (int)enemy.pos_y;
                             if ((dx == -1 || dx == 0 || dx == 1) && (dy == -1 || dy == 0 || dy == 1))
                             {
                                 turn_queue.Enqueue(new TurnInfo(TURN_TYPE.ENEMY_TURN, enemy));
                                 turn_used_enemy_list.Add(enemy);
                             }
                         }
-                        if (playerInfo.unit_state != UNIT_STATE.IDLE && playerInfo.unit_state != UNIT_STATE.SLEEPING) turn_queue.Enqueue(new TurnInfo(TURN_TYPE.PLAYER_TURN, playerInfo));
-
+                        if (this.player_info.unit_state != UNIT_STATE.IDLE && this.player_info.unit_state != UNIT_STATE.SLEEPING)
+                        {
+                            turn_queue.Enqueue(new TurnInfo(TURN_TYPE.PLAYER_TURN, this.player_info));
+                        }
+                        UpdateShadow();
                         string output = "turn_queue : ";
                         foreach (TurnInfo cur in turn_queue)
                         {
                             output += cur.turn_type + ",";
                         }
                         Debug.Log(output);
-
-
+                        SaveData(this.game_idx);
                         break;
                     case TURN_TYPE.ENEMY_TURN:
-                        playerInfo.hp -= 5;
+                        this.player_info.hp -= 5;
                         break;
                 }
-                Debug.Log("playerInfo.hp" + playerInfo.hp);
-
-
+                Debug.Log("playerInfo.hp" + this.player_info.hp);
                 //attack을 queue에 넣은 애들 말고는 움직여야함
-                foreach (EnemyInfo enemy in enemy_list)
+                if (true || turn_queue.Count == 0 || turn_queue.Peek().turn_type == TURN_TYPE.PLAYER_TURN)
                 {
-                    if (enemy.DetectPlayer(playerInfo, map_arr))
+                    foreach (EnemyInfo enemy in enemy_list)
                     {
-                        enemy.SetPathTo(playerInfo.pos_x, playerInfo.pos_y, map_arr, enemy_list, playerInfo);
-                        if (enemy.cur_path.Count > 0)
+                        if (enemy.DetectPlayer(this.player_info, this.terrain_info_arr))
                         {
-                            if (enemy.DetectObstacle(enemy.cur_path[0].Item1, enemy.cur_path[0].Item2, enemy_list, playerInfo))
+                            enemy.SetPathTo(this.player_info.pos_x, this.player_info.pos_y, this.terrain_info_arr, enemy_list, this.player_info);
+                            if (enemy.cur_path.Count > 0)
                             {
-                                enemy.SetPathTo(playerInfo.pos_x, playerInfo.pos_y, map_arr, enemy_list, playerInfo);
-                            }
-                            else
-                            {
-                                enemy.SetPos(enemy.cur_path[0].Item1, enemy.cur_path[0].Item2);
-                                enemy.cur_path.RemoveAt(0);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (enemy.cur_path.Count > 0)
-                        {
-                            if (enemy.DetectObstacle(enemy.cur_path[0].Item1, enemy.cur_path[0].Item2, enemy_list, playerInfo))
-                            {
-                                enemy.SetPathTo(enemy.cur_path[enemy.cur_path.Count - 1].Item1, enemy.cur_path[enemy.cur_path.Count - 1].Item2, map_arr, enemy_list, playerInfo);
-                            }
-                            else
-                            {
-                                enemy.SetPos(enemy.cur_path[0].Item1, enemy.cur_path[0].Item2);
-                                enemy.cur_path.RemoveAt(0);
+                                if (enemy.DetectObstacle(enemy.cur_path[0].Item1, enemy.cur_path[0].Item2, enemy_list, this.player_info))
+                                {
+                                    enemy.SetPathTo(this.player_info.pos_x, this.player_info.pos_y, this.terrain_info_arr, enemy_list, this.player_info);
+                                }
+                                else
+                                {
+                                    enemy.SetPos(enemy.cur_path[0].Item1, enemy.cur_path[0].Item2);
+                                    enemy.cur_path.RemoveAt(0);
+                                }
                             }
                         }
                         else
                         {
-                            List<SquareSpaceInfo> space_list = ((SquareRoomMapInfo)cur_mapInfo).space_list;
-                            int idx = Random.Range(0, space_list.Count);
-                            int move_x = Random.Range(space_list[idx].start_x + 1, space_list[idx].end_x - 1);
-                            int move_y = Random.Range(space_list[idx].start_y + 1, space_list[idx].end_y - 1);
-                            enemy.SetPathTo(move_x, move_y, map_arr, enemy_list, playerInfo);
+                            if (enemy.cur_path.Count > 0)
+                            {
+                                if (enemy.DetectObstacle(enemy.cur_path[0].Item1, enemy.cur_path[0].Item2, enemy_list, this.player_info))
+                                {
+                                    enemy.SetPathTo(enemy.cur_path[enemy.cur_path.Count - 1].Item1, enemy.cur_path[enemy.cur_path.Count - 1].Item2, this.terrain_info_arr, enemy_list, this.player_info);
+                                }
+                                else
+                                {
+                                    enemy.SetPos(enemy.cur_path[0].Item1, enemy.cur_path[0].Item2);
+                                    enemy.cur_path.RemoveAt(0);
+                                }
+                            }
+                            else
+                            {
+                                List<SquareSpaceInfo> space_list = ((SquareRoomMapInfo)this.cur_map_info).space_list;
+                                int idx = UnityEngine.Random.Range(0, space_list.Count);
+                                int move_x = UnityEngine.Random.Range(space_list[idx].start_x + 1, space_list[idx].end_x - 1);
+                                int move_y = UnityEngine.Random.Range(space_list[idx].start_y + 1, space_list[idx].end_y - 1);
+                                enemy.SetPathTo(move_x, move_y, this.terrain_info_arr, enemy_list, this.player_info);
+                            }
                         }
                     }
                 }
-
                 prev_action_time = Time.time;
             }
         }
-        
 
         //draw
-        if (player_object.transform.position.x != playerInfo.pos_x || player_object.transform.position.y != playerInfo.pos_y)
+        if (player_object.transform.position.x != this.player_info.pos_x || player_object.transform.position.y != this.player_info.pos_y)
         {
-            player_object.transform.position = new Vector3(playerInfo.pos_x, playerInfo.pos_y, 0);
-            cam.transform.position = new Vector3(playerInfo.pos_x, playerInfo.pos_y, -10);
+            player_object.transform.position = new Vector3(this.player_info.pos_x, this.player_info.pos_y, 0);
+            cam.transform.position = new Vector3(this.player_info.pos_x, this.player_info.pos_y, -10);
         }
-        foreach(EnemyInfo enemy in enemy_list)
+        foreach (EnemyInfo enemy in enemy_list)
         {
             enemy_object_dict[enemy].transform.position = new Vector3(enemy.pos_x, enemy.pos_y, 0);
+            /*
+            if (this.terrain_info_arr[enemy.pos_y, enemy.pos_x].in_player_sight)
+            {
+                this.enemy_object_dict[enemy].SetActive(true);
+            }
+            else
+            {
+                //this.enemy_object_dict[enemy].SetActive(false);
+            }*/
+        }
+        
+        for (int i = 0; i < this.terrain_object_arr.GetLength(0); i++)
+        {
+            for (int j = 0; j < this.terrain_object_arr.GetLength(1); j++)
+            {
+                if (terrain_info_arr[i, j].in_player_sight)
+                {
+                    Color color = this.shadow_object_arr[i, j].GetComponent<SpriteRenderer>().color;
+                    this.shadow_object_arr[i, j].GetComponent<SpriteRenderer>().color = new Color(color.r, color.g, color.b, 0.0f);
+                }
+                else if(this.terrain_info_arr[i, j].visited)
+                {
+                    Color color = this.shadow_object_arr[i, j].GetComponent<SpriteRenderer>().color;
+                    this.shadow_object_arr[i, j].GetComponent<SpriteRenderer>().color = new Color(color.r, color.g, color.b, 0.5f);
+                }
+            }
         }
     }
 
-
     private void ChangeMap(MapInfo from, MapInfo to)
     {
-        //이전 정보 삭제
-        foreach (GameObject cur in this.terrain_list)
+        //이전 object 삭제
+        for(int i = 0; i < this.terrain_object_arr.GetLength(0); i++)
         {
-            Destroy(cur);
-        }
-        this.terrain_list.Clear();
-        foreach(EnemyInfo cur in this.enemy_list)
-        {
-            Destroy(enemy_object_dict[cur]);
-        }
-        this.enemy_list = new List<EnemyInfo>();
-        this.enemy_object_dict = new Dictionary<EnemyInfo, GameObject>();
-
-        //정보 init
-        (int[,], List<EnemyInfo>) infos = ((SquareRoomMapInfo)to).GetMapInfos();
-        this.cur_mapInfo = to;
-        this.map_arr = infos.Item1;
-        this.enemy_list = infos.Item2;
-
-        //draw terrain
-        for (int i = 0; i < this.map_arr.GetLength(0); i++)
-        {
-            for (int j = 0; j < this.map_arr.GetLength(1); j++)
+            for(int j = 0; j < this.terrain_object_arr.GetLength(1); j++)
             {
-                if (this.map_arr[i, j] == (int)TERRAIN_TYPE.EMPTY) terrain_list.Add(Instantiate(empty_prefab, new Vector3(j, i, 0), Quaternion.identity));
-                else if (this.map_arr[i, j] == (int)TERRAIN_TYPE.FLOOR) terrain_list.Add(Instantiate(floor_prefab, new Vector3(j, i, 0), Quaternion.identity));
-                else if (this.map_arr[i, j] == (int)TERRAIN_TYPE.WALL) terrain_list.Add(Instantiate(wall_prefab, new Vector3(j, i, 0), Quaternion.identity));
-                else if (this.map_arr[i, j] == (int)TERRAIN_TYPE.BRIDGE) terrain_list.Add(Instantiate(bridge_prefab, new Vector3(j, i, 0), Quaternion.identity));
-                else if (this.map_arr[i, j] == (int)TERRAIN_TYPE.DOOR) terrain_list.Add(Instantiate(door_prefab, new Vector3(j, i, 0), Quaternion.identity));
-                else if (this.map_arr[i, j] == (int)TERRAIN_TYPE.STAIR) terrain_list.Add(Instantiate(stair_prefab, new Vector3(j, i, 0), Quaternion.identity));
+                Destroy(this.terrain_object_arr[i, j]);
             }
         }
+        for (int i = 0; i < this.shadow_object_arr.GetLength(0); i++)
+        {
+            for (int j = 0; j < this.shadow_object_arr.GetLength(1); j++)
+            {
+                Destroy(this.shadow_object_arr[i, j]);
+            }
+        }
+        foreach (EnemyInfo cur in this.enemy_list)
+        {
+            Destroy(this.enemy_object_dict[cur]);
+        }
 
-        //이동한 star 위치에 player위치
+        //새로운 정보 init
+        this.cur_map_info = to;
+        this.terrain_info_arr = this.cur_map_info.terrain_info_arr;
+        this.enemy_list = this.cur_map_info.enemy_list;
+
+        this.terrain_object_arr = new GameObject[this.terrain_info_arr.GetLength(0), this.terrain_info_arr.GetLength(1)];
+        this.shadow_object_arr = new GameObject[this.terrain_info_arr.GetLength(0), this.terrain_info_arr.GetLength(1)];
+        this.enemy_object_dict = new Dictionary<EnemyInfo, GameObject>();
+
+        
+        //player 위치 to맵으로
+        this.player_info.hierarchy_idx = to.hierarchy_idx;
+        this.player_info.layer_idx = to.layer_idx;
+        this.player_info.map_idx = to.map_idx;
+
+        //이동한 stair 위치에 player위치
         StairInfo target_stair = null;
-        foreach (StairInfo cur in this.cur_mapInfo.stair_list)
+        foreach (StairInfo cur in this.cur_map_info.stair_list)
         {
             if (cur.connected_map.id == from.id) target_stair = cur;
         }
         if (target_stair != null)
         {
-            playerInfo.SetPos(target_stair.pos_x, target_stair.pos_y);
-            player_object.transform.position = new Vector3(playerInfo.pos_x, target_stair.pos_y, 0);
+            this.player_info.SetPos(target_stair.pos_x, target_stair.pos_y);
+            this.player_object.transform.position = new Vector3(this.player_info.pos_x, this.player_info.pos_y, 0);
         }
         else //일어나면 안되는 일!
         {
             Debug.Log("Fatal error : stair find failure");
-            List<SquareSpaceInfo> space_list = ((SquareRoomMapInfo)cur_mapInfo).space_list;
-            int idx = Random.Range(0, space_list.Count);
-            int spawn_x = Random.Range(space_list[idx].start_x + 1, space_list[idx].end_x - 1);
-            int spawn_y = Random.Range(space_list[idx].start_y + 1, space_list[idx].end_y - 1);
-            playerInfo.SetPos(spawn_x, spawn_y);
-            player_object.transform.position = new Vector3(spawn_x, spawn_y, 0);
+            List<SquareSpaceInfo> space_list = ((SquareRoomMapInfo)this.cur_map_info).space_list;
+            int idx = UnityEngine.Random.Range(0, space_list.Count);
+            int spawn_x = UnityEngine.Random.Range(space_list[idx].start_x + 1, space_list[idx].end_x - 1);
+            int spawn_y = UnityEngine.Random.Range(space_list[idx].start_y + 1, space_list[idx].end_y - 1);
+            this.player_info.SetPos(spawn_x, spawn_y);
+            this.player_object.transform.position = new Vector3(spawn_x, spawn_y, 0);
         }
+
+        //terrain-shadow init     
+        for (int i = 0; i < this.terrain_info_arr.GetLength(0); i++)
+        {
+            for (int j = 0; j < this.terrain_info_arr.GetLength(1); j++)
+            {
+                int dx = player_info.pos_x - j;
+                int dy = player_info.pos_y - i;
+                if (this.player_info.pos_x == j && this.player_info.pos_y == i)
+                {
+                    terrain_info_arr[i, j].visited = true;
+                    terrain_info_arr[i, j].in_player_sight = true;
+                }
+                else if (dx * dx + dy * dy < 20)
+                {
+                    if (player_info.PlayerSight(j, i, terrain_info_arr))
+                    {
+                        terrain_info_arr[i, j].visited = true;
+                        terrain_info_arr[i, j].in_player_sight = true;
+                    }
+                    else
+                    {
+                        terrain_info_arr[i, j].in_player_sight = false;
+                    }
+                }
+            }
+        }
+
+        //draw terrain
+        for (int i = 0; i < this.terrain_info_arr.GetLength(0); i++)
+        {
+            for (int j = 0; j < this.terrain_info_arr.GetLength(1); j++)
+            {
+                if (this.terrain_info_arr[i, j].terrain_type == TERRAIN_TYPE.EMPTY)
+                {
+                    this.terrain_object_arr[i, j] = Instantiate(empty_prefab, new Vector3(j, i, 0), Quaternion.identity);
+                }
+                else if (this.terrain_info_arr[i, j].terrain_type == TERRAIN_TYPE.FLOOR)
+                {
+                    this.terrain_object_arr[i, j] = Instantiate(floor_prefab, new Vector3(j, i, 0), Quaternion.identity);
+                }
+
+                else if (this.terrain_info_arr[i, j].terrain_type == TERRAIN_TYPE.WALL)
+                {
+                    this.terrain_object_arr[i, j] = Instantiate(wall_prefab, new Vector3(j, i, 0), Quaternion.identity);
+                }
+                else if (this.terrain_info_arr[i, j].terrain_type == TERRAIN_TYPE.BRIDGE)
+                {
+                    this.terrain_object_arr[i, j] = Instantiate(bridge_prefab, new Vector3(j, i, 0), Quaternion.identity);
+                }
+                else if (this.terrain_info_arr[i, j].terrain_type == TERRAIN_TYPE.DOOR)
+                {
+                    this.terrain_object_arr[i, j] = Instantiate(door_prefab, new Vector3(j, i, 0), Quaternion.identity);
+                }
+                else if (this.terrain_info_arr[i, j].terrain_type == TERRAIN_TYPE.STAIR)
+                {
+                    this.terrain_object_arr[i, j] = Instantiate(stair_prefab, new Vector3(j, i, 0), Quaternion.identity);
+                }
+            }
+        }  
 
         //draw enemies
         foreach (EnemyInfo cur in this.enemy_list)
@@ -346,7 +497,18 @@ public class GameSystemManager : MonoBehaviour
            enemy_object_dict[cur] = Instantiate(enemy_crab_prefab, new Vector3(cur.pos_x, cur.pos_y, 0), Quaternion.identity);
         }
 
-        cam.transform.position = new Vector3(playerInfo.pos_x, playerInfo.pos_y, -10);
+        //draw shadow
+        
+        for (int i = 0; i < this.terrain_object_arr.GetLength(0); i++)
+        {
+            for (int j = 0; j < this.terrain_object_arr.GetLength(1); j++)
+            {
+                this.shadow_object_arr[i, j] = Instantiate(shadow_prefab, new Vector3(j, i, 0), Quaternion.identity);
+            }
+        }
+
+        //camera
+        cam.transform.position = new Vector3(this.player_info.pos_x, this.player_info.pos_y, -10);
     }
     private TouchInfo GetTouch()
     {
@@ -367,29 +529,30 @@ public class GameSystemManager : MonoBehaviour
                 float touch_interval = Time.time - touch_began_time;
                 if (touch_interval >= 0.2f) return new TouchInfo(TOUCH_INPUT_TYPE.NONE); // touch interval 짧으면 NONE return함
 
-                if (playerInfo.cur_path.Count > 0) return new TouchInfo(TOUCH_INPUT_TYPE.MOVE_INTERRUPT); //이동중에 누르면 이동 취소
+                if (this.player_info.cur_path.Count > 0) return new TouchInfo(TOUCH_INPUT_TYPE.MOVE_INTERRUPT); //이동중에 누르면 이동 취소
                 else                                                                                      //이동중이 아닐 때 누르면(멈춰있을 때)
                 {
                     Vector3 touch_pos = Camera.main.ScreenToWorldPoint(touch.position);
                     touch_pos = new Vector3(touch_pos.x + 0.3f, touch_pos.y + 0.3f, 0); //보정치 0.3f 더해주면 좀 더 터치가 정확해짐
+                    Debug.Log("touch_pos.x + 0.3f, touch_pos.y + 0.3f :" + touch_pos.x + ", " + touch_pos.y);
 
-                    if (playerInfo.pos_x == (int)touch_pos.x && playerInfo.pos_y == (int)touch_pos.y) //나를 눌렀을 때
+                    if (this.player_info.pos_x == (int)touch_pos.x && this.player_info.pos_y == (int)touch_pos.y) //나를 눌렀을 때
                     {
-                        if (map_arr[(int)touch_pos.y, (int)touch_pos.x] == (int)TERRAIN_TYPE.STAIR)   //그 위치가 계단과 같을 때
+                        if (terrain_info_arr[(int)touch_pos.y, (int)touch_pos.x].terrain_type == TERRAIN_TYPE.STAIR)   //그 위치가 계단과 같을 때
                         {
-                            foreach (StairInfo cur in cur_mapInfo.stair_list)
+                            foreach (StairInfo cur in this.cur_map_info.stair_list)
                             {
                                 if (cur.pos_x == (int)touch_pos.x && cur.pos_y == (int)touch_pos.y) // 해당하는 stair를 찾음
                                 {
-                                    return new TouchInfo(TOUCH_INPUT_TYPE.PLAYER_ENTER_STAIR, this.cur_mapInfo, cur.connected_map);
+                                    return new TouchInfo(TOUCH_INPUT_TYPE.PLAYER_ENTER_STAIR, this.cur_map_info, cur.connected_map);
                                 }
                             }
                         }
                     }
                     else                                                                               //나를 누르지 않았을 때
                     {
-                        int dx = playerInfo.pos_x - (int)touch_pos.x;
-                        int dy = playerInfo.pos_y - (int)touch_pos.y;
+                        int dx = this.player_info.pos_x - (int)touch_pos.x;
+                        int dy = this.player_info.pos_y - (int)touch_pos.y;
                         if ((dx == -1 || dx == 0 || dx == 1) && (dy == -1 || dy == 0 || dy == 1))       //내 주변을 눌렀는데
                         {
                             foreach (EnemyInfo enemy in enemy_list)
@@ -408,5 +571,229 @@ public class GameSystemManager : MonoBehaviour
             }
         }
         return touch_info;
+    }
+
+    public void SaveData(int game_idx)
+    {
+        //현재 enemy 위치를 정확하게 업데이트 해 주고 나서 저장!
+        this.cur_map_info.enemy_list = this.enemy_list;
+        SaveData data = new SaveData(this.dungeon, 10, this.player_info);
+        string json_string = JsonUtility.ToJson(data);
+
+        /*
+        int max = 0;
+        DirectoryInfo di = new DirectoryInfo(Application.persistentDataPath + "/");
+        foreach(FileInfo File in di.GetFiles())
+        {
+            Debug.Log(File.Name);
+            int file_idx = int.Parse(File.Name.Split('.')[0].Split('_')[1]);
+            if (max < file_idx) max = file_idx;
+        }
+        //꼭 고챠!!!!!!!!!
+        max = 9;*/
+
+        File.WriteAllText(Path.Combine(Application.persistentDataPath, "dungeondata_" + game_idx + ".Json"), json_string);
+    }
+
+    public void InitGame(bool game_loaded,int game_idx)
+    {
+        //정보 init
+        if (game_loaded)
+        {
+            string load_data = File.ReadAllText(Path.Combine(Application.persistentDataPath, "dungeondata_" + game_idx + ".Json"));
+
+            SaveData data = JsonUtility.FromJson<SaveData>(load_data);
+
+            SaveData.EnemySerializedList enemySerialized = data.enemySerialized;
+            SaveData.SeedInfo seedInfo = data.seedInfo;
+
+            UnityEngine.Random.InitState(seedInfo.seed);
+            Dungeon load_dungeon = new Dungeon(3);
+
+            foreach (HierarchyInfo hierarchy in load_dungeon.hierarchy_list)
+            {
+                foreach (List<MapInfo> map_linfo_list in hierarchy.mapInfos_of_layer)
+                {
+
+                    foreach (MapInfo map_info in map_linfo_list)
+                    {
+                        map_info.enemy_list.Clear();
+                    }
+                }
+            }
+            foreach (EnemyInfo enemy in enemySerialized.enemy_serialized_list)
+            {
+                load_dungeon.hierarchy_list[enemy.hierarchy_idx].mapInfos_of_layer[enemy.layer_idx][enemy.map_idx].enemy_list.Add(enemy);
+            }
+
+            this.dungeon = load_dungeon;
+            this.player_info = data.player_info;
+            this.cur_map_info = this.dungeon.hierarchy_list[this.player_info.hierarchy_idx].mapInfos_of_layer[this.player_info.layer_idx][this.player_info.map_idx];
+            this.terrain_info_arr = (TerrainInfo[,])this.cur_map_info.terrain_info_arr.Clone();
+            this.enemy_list = new List<EnemyInfo>(this.cur_map_info.enemy_list);
+
+            this.terrain_object_arr = new GameObject[this.terrain_info_arr.GetLength(0), this.terrain_info_arr.GetLength(1)];
+            this.shadow_object_arr = new GameObject[this.terrain_info_arr.GetLength(0), this.terrain_info_arr.GetLength(1)];
+            this.enemy_object_dict = new Dictionary<EnemyInfo, GameObject>();
+        }
+        else
+        {
+            int difficulty = 3;
+            this.dungeon = new Dungeon(difficulty);
+            this.player_info = new PlayerInfo();
+            this.cur_map_info = dungeon.hierarchy_list[0].mapInfos_of_layer[1][0];
+            this.terrain_info_arr = this.cur_map_info.terrain_info_arr;
+            this.enemy_list = this.cur_map_info.enemy_list;
+
+            this.terrain_object_arr = new GameObject[this.terrain_info_arr.GetLength(0), this.terrain_info_arr.GetLength(1)];
+            this.shadow_object_arr = new GameObject[this.terrain_info_arr.GetLength(0), this.terrain_info_arr.GetLength(1)];
+            this.enemy_object_dict = new Dictionary<EnemyInfo, GameObject>();
+        }
+        //set player position
+        if (game_loaded)
+        {
+            this.player_object.transform.position = new Vector3(this.player_info.pos_x, this.player_info.pos_y, 0);
+        }
+        else
+        {
+            StairInfo target_stair = null;
+            foreach (StairInfo cur in this.cur_map_info.stair_list)
+            {
+                if (cur.connected_map.id == dungeon.hierarchy_list[0].mapInfos_of_layer[0][0].id) target_stair = cur;
+            }
+            if (target_stair != null)
+            {
+                this.player_info.SetPos(target_stair.pos_x, target_stair.pos_y);
+                this.player_object.transform.position = new Vector3(this.player_info.pos_x, this.player_info.pos_y, 0);
+            }
+        }
+
+        //terrain-shadow init
+        for(int i = 0; i < this.terrain_info_arr.GetLength(0); i++)
+        {
+            for(int j = 0; j < this.terrain_info_arr.GetLength(1); j++)
+            {
+                int dx = player_info.pos_x - j;
+                int dy = player_info.pos_y - i;
+                if(this.player_info.pos_x == j && this.player_info.pos_y == i)
+                {
+                    terrain_info_arr[i, j].visited = true;
+                    terrain_info_arr[i, j].in_player_sight = true;
+                }
+                else if(dx*dx + dy*dy < 20)
+                {
+                    Debug.Log("playersight : " + player_info.PlayerSight(j, i, terrain_info_arr));
+                    if (player_info.PlayerSight(j, i, terrain_info_arr))
+                    {
+                        terrain_info_arr[i, j].visited = true;
+                        terrain_info_arr[i, j].in_player_sight = true;
+                    }
+                    else
+                    {
+                        terrain_info_arr[i, j].in_player_sight = false;
+                    }
+                }
+            }
+        }
+
+        //create terrain objects
+        for (int i = 0; i < this.terrain_info_arr.GetLength(0); i++)
+        {
+            for (int j = 0; j < this.terrain_info_arr.GetLength(1); j++)
+            {
+                if (this.terrain_info_arr[i, j].terrain_type == TERRAIN_TYPE.EMPTY)
+                {
+                    this.terrain_object_arr[i, j] = Instantiate(empty_prefab, new Vector3(j, i, 0), Quaternion.identity);
+                }
+                else if (this.terrain_info_arr[i, j].terrain_type == TERRAIN_TYPE.FLOOR)
+                {
+                    this.terrain_object_arr[i, j] = Instantiate(floor_prefab, new Vector3(j, i, 0), Quaternion.identity);
+                }
+                else if (this.terrain_info_arr[i, j].terrain_type == TERRAIN_TYPE.WALL)
+                {
+                    this.terrain_object_arr[i, j] = Instantiate(wall_prefab, new Vector3(j, i, 0), Quaternion.identity);
+                }
+                else if (this.terrain_info_arr[i, j].terrain_type == TERRAIN_TYPE.BRIDGE)
+                {
+                    this.terrain_object_arr[i, j] = Instantiate(bridge_prefab, new Vector3(j, i, 0), Quaternion.identity);
+                }
+                else if (this.terrain_info_arr[i, j].terrain_type == TERRAIN_TYPE.DOOR)
+                {
+                    this.terrain_object_arr[i, j] = Instantiate(door_prefab, new Vector3(j, i, 0), Quaternion.identity);
+                }
+                else if (this.terrain_info_arr[i, j].terrain_type == TERRAIN_TYPE.STAIR)
+                {
+                    this.terrain_object_arr[i, j] = Instantiate(stair_prefab, new Vector3(j, i, 0), Quaternion.identity);
+                }
+            }
+        }
+
+        //create enemy objects
+        foreach (EnemyInfo cur in this.enemy_list)
+        {
+            enemy_object_dict[cur] = Instantiate(enemy_crab_prefab, new Vector3(cur.pos_x, cur.pos_y, 0), Quaternion.identity);
+        }
+
+        //create shadows
+        
+        for (int i = 0; i < this.terrain_object_arr.GetLength(0); i++)
+        {
+            for (int j = 0; j < this.terrain_object_arr.GetLength(1); j++)
+            {
+                GameObject shadow = Instantiate(shadow_prefab, new Vector3(j, i, 0), Quaternion.identity);
+                if (terrain_info_arr[i, j].in_player_sight == true)
+                {
+                    Color color = shadow.GetComponent<SpriteRenderer>().color;
+                    shadow.GetComponent<SpriteRenderer>().color = new Color(color.r, color.g, color.b, 0);
+                }
+                this.shadow_object_arr[i, j] = shadow;
+            }
+        }
+
+        //camera
+        cam.transform.position = new Vector3(this.player_info.pos_x, this.player_info.pos_y, -10);
+    }
+
+    public void PrintFileList()
+    {
+        DirectoryInfo di = new DirectoryInfo(Application.persistentDataPath + "/");
+        foreach (FileInfo File in di.GetFiles())
+        {
+            Debug.Log(File.Name);
+        }
+    }
+
+    private void UpdateShadow()
+    {
+        for (int i = 0; i < this.terrain_info_arr.GetLength(0); i++)
+        {
+            for (int j = 0; j < this.terrain_info_arr.GetLength(1); j++)
+            {
+                int dx = player_info.pos_x - j;
+                int dy = player_info.pos_y - i;
+                if (this.player_info.pos_x == j && this.player_info.pos_y == i)
+                {
+                    terrain_info_arr[i, j].visited = true;
+                    terrain_info_arr[i, j].in_player_sight = true;
+                }
+                else if (dx * dx + dy * dy < 20)
+                {
+                    Debug.Log("playersight : " + player_info.PlayerSight(j, i, terrain_info_arr));
+                    if (player_info.PlayerSight(j, i, terrain_info_arr))
+                    {
+                        terrain_info_arr[i, j].visited = true;
+                        terrain_info_arr[i, j].in_player_sight = true;
+                    }
+                    else
+                    {
+                        terrain_info_arr[i, j].in_player_sight = false;
+                    }
+                }
+                else
+                {
+                    terrain_info_arr[i, j].in_player_sight = false;
+                }
+            }
+        }
     }
 }

@@ -1758,6 +1758,7 @@ GameObject:
   - component: {fileID: 981609518}
   - component: {fileID: 981609517}
   - component: {fileID: 981609516}
+  - component: {fileID: 981609520}
   m_Layer: 5
   m_Name: MainBut
   m_TagString: Untagged
@@ -1842,6 +1843,18 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
+      - m_Target: {fileID: 1602366392}
+        m_TargetAssemblyTypeName: GameSystemManager, Assembly-CSharp
+        m_MethodName: SaveData
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
       - m_Target: {fileID: 981609516}
         m_TargetAssemblyTypeName: ScenePager, Assembly-CSharp
         m_MethodName: ScenePagerToMain
@@ -1892,6 +1905,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 981609514}
   m_CullTransparentMesh: 1
+--- !u!114 &981609520
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 981609514}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf0b2e82258939847ab8d75ad0340b9a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &989423222
 GameObject:
   m_ObjectHideFlags: 8
@@ -2184,7 +2209,7 @@ SpriteRenderer:
   m_SortingLayerID: -1922174513
   m_SortingLayer: 1
   m_SortingOrder: 0
-  m_Sprite: {fileID: 1949621811, guid: 9de0c6455aeeff048aa53e0b508579c9, type: 3}
+  m_Sprite: {fileID: 1065687495, guid: 5e842a917e7a2d34daec1bfdeb2b0ff2, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -2666,9 +2691,9 @@ RectTransform:
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0.185, y: 0.13000001}
-  m_AnchoredPosition: {x: -0.00012207031, y: -0.00012207031}
-  m_SizeDelta: {x: 0.00015259, y: -0.000061035}
+  m_AnchorMax: {x: 0.185, y: 0.104}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1381947120
 MonoBehaviour:
@@ -2734,7 +2759,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 26c341e36ec1da141b51434c0c57139f, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 2c6c9db12ee76ca4289482a4ac4649ae, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -3181,9 +3206,12 @@ MonoBehaviour:
   empty_prefab: {fileID: 5582010243355781996, guid: afd16f3c6c0f6644287e3101c27d2130, type: 3}
   floor_prefab: {fileID: 5184755171646864271, guid: 465a4b64023d4904dbe7f369f8ffc629, type: 3}
   wall_prefab: {fileID: 3221364860796858949, guid: 49e2246ec68d8704a90e126e101d6ca2, type: 3}
+  wall_left_prefab: {fileID: 2260790627535203235, guid: 33ec0dd1551f1c64b8eb5da359b3b2e3, type: 3}
+  wall_right_prefab: {fileID: 7264525983256206142, guid: 29737ca22da0edf4d8b1ba577d3ba8bf, type: 3}
   bridge_prefab: {fileID: 4567168210757365970, guid: 2a89e80202b904442ac4988e28cbb76b, type: 3}
   door_prefab: {fileID: 8065170049285674915, guid: ed9d7b159cdfefe45b16c5c767450bb9, type: 3}
   stair_prefab: {fileID: 4038738027710592003, guid: 3f9dd024e8d255f44bac16cfc4b2fffb, type: 3}
+  shadow_prefab: {fileID: 992352599958091811, guid: 800d13c7dab407e41b237aa6fdb9bac0, type: 3}
   enemy_crab_prefab: {fileID: 2215931942538672318, guid: bd9c9c4a065f4b3429c15c3fdbf680c1, type: 3}
   player_object: {fileID: 1054705958}
   cam: {fileID: 519420031}
@@ -3822,9 +3850,9 @@ RectTransform:
   m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.185, y: 0}
-  m_AnchorMax: {x: 0.37100002, y: 0.13052085}
-  m_AnchoredPosition: {x: 0.000091552734, y: 0}
-  m_SizeDelta: {x: -0.00021362, y: -0.000015259}
+  m_AnchorMax: {x: 0.37100002, y: 0.10410418}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1931790301
 MonoBehaviour:
@@ -3890,7 +3918,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: e0d0b7e94d691a645ac62dc5c7e31c1c, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 4b96d92d3f3ea35488eb6077c519bce2, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -4024,7 +4052,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: fd020bd646fc2fc438c03bd4108ac738, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 3ea31c19174041641a14aa645c41d9aa, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

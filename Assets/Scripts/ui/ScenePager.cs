@@ -7,16 +7,12 @@ public class ScenePager : MonoBehaviour
 {
     public void ScenePagerToGame()
     {
-
         SceneManager.LoadScene(1);
-        
     }
 
     public void ScenePagerToMain()
     {
-
         SceneManager.LoadScene(0);
-
     }
 
 }

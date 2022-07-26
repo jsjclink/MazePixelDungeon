@@ -1,20 +1,27 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
-
-
+[Serializable]
 public class EnemyInfo: UnitInfo{
+    public int hierarchy_idx;
+    public int layer_idx;
+    public int map_idx;
 
     public int pos_x;
     public int pos_y;
-    public int hp;
+    public int hp = 10;
+    public int attack_pt = 5;
 
     public List<(int, int)> cur_path;
 
-    public EnemyInfo(int x, int y)
+    public EnemyInfo(int x, int y, int hierarchy_idx, int layer_idx, int map_idx)
     {
         this.unit_type = UNIT_TYPE.ENEMY_CRAB;
+        this.hierarchy_idx = hierarchy_idx;
+        this.layer_idx = layer_idx;
+        this.map_idx = map_idx;
         this.pos_x = x;
         this.pos_y = y;
         this.unit_state = UNIT_STATE.IDLE;
@@ -25,14 +32,14 @@ public class EnemyInfo: UnitInfo{
         this.pos_x = x;
         this.pos_y = y;
     }
-    public bool DetectPlayer(PlayerInfo playerInfo, int[,] map)
+    public bool DetectPlayer(PlayerInfo playerInfo, TerrainInfo[,] map)
     {
         int dx = playerInfo.pos_x - this.pos_x;
         int dy = playerInfo.pos_y - this.pos_y;
         if (dx * dx + dy * dy < 20) return true;
         else return false;
     }
-    public void SetPathTo(int target_x, int target_y, int[,] map, List<EnemyInfo> enemy_list, PlayerInfo playerInfo)
+    public void SetPathTo(int target_x, int target_y, TerrainInfo[,] map, List<EnemyInfo> enemy_list, PlayerInfo playerInfo)
     {
         int height = map.GetLength(0); int width = map.GetLength(1);
         int[] dx = { 0, 1, 1, 1, 0, -1, -1, -1 };
@@ -40,14 +47,14 @@ public class EnemyInfo: UnitInfo{
 
         this.cur_path = new List<(int, int)>();
 
-        if (map[target_y, target_x] == (int)TERRAIN_TYPE.EMPTY || map[target_y, target_x] == (int)TERRAIN_TYPE.WALL) return;
+        if (map[target_y, target_x].terrain_type == TERRAIN_TYPE.EMPTY || map[target_y, target_x].terrain_type == TERRAIN_TYPE.WALL) return;
 
         bool[,] visited = new bool[height, width];
         for (int i = 0; i < height; i++)
         {
             for (int j = 0; j < width; j++)
             {
-                if (map[i, j] == (int)TERRAIN_TYPE.EMPTY || map[i, j] == (int)TERRAIN_TYPE.WALL) visited[i, j] = true;
+                if (map[i, j].terrain_type == TERRAIN_TYPE.EMPTY || map[i, j].terrain_type == TERRAIN_TYPE.WALL) visited[i, j] = true;
                 else visited[i, j] = false;
             }
         }

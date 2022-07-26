@@ -4,26 +4,28 @@ using UnityEngine;
 
 public class HierarchyInfo
 {
-	private int hierarchy_idx;
-	public List<MapInfo>[] mapInfos_of_layer = new List<MapInfo>[5]; //Ãþ¸¶´Ù ¸Ê Á¤º¸ ÀúÀå
-
+	public int hierarchy_idx;
+	public List<MapInfo>[] mapInfos_of_layer; //Ãþ¸¶´Ù ¸Ê Á¤º¸ ÀúÀå
 	public HierarchyInfo(int hierarchy_idx, int difficulty)
 	{
+		mapInfos_of_layer = new List<MapInfo>[5];
 		this.hierarchy_idx = hierarchy_idx;
 		for (int i = 0; i < 5; i++)
 		{
 			mapInfos_of_layer[i] = new List<MapInfo>();
 			if (i == 0)
 			{
-				mapInfos_of_layer[i].Add(new SquareRoomMapInfo(hierarchy_idx, 0, 0, 70, 70));
+				MapInfo new_map = new SquareRoomMapInfo(hierarchy_idx, 0, 0, 70, 70);
+				mapInfos_of_layer[i].Add(new_map);
 			}
 			else
 			{
-				int mapnum = i * (hierarchy_idx + 1) + Random.Range(-i + 1, i + difficulty + 1);
+				int mapnum = i * (hierarchy_idx + 1) + UnityEngine.Random.Range(-i + 1, i + difficulty + 1);
 				if (mapnum > 5) mapnum = 5;
 				for (int j = 0; j < mapnum; j++)
 				{
-					mapInfos_of_layer[i].Add(new SquareRoomMapInfo(hierarchy_idx, i, j, 70, 70));
+					MapInfo ne_map = new SquareRoomMapInfo(hierarchy_idx, i, j, 70, 70);
+					mapInfos_of_layer[i].Add(ne_map);
 				}
 			}
 		}
@@ -40,7 +42,7 @@ public class HierarchyInfo
 
 		while ((unconnected_list = FindUnConnected()).Count > 0)
 		{
-			int rand_idx = Random.Range(0, unconnected_list.Count);
+			int rand_idx = UnityEngine.Random.Range(0, unconnected_list.Count);
 			int from_layer_idx = unconnected_list[rand_idx].layer_idx;
 			int from_map_idx = unconnected_list[rand_idx].map_idx;
 			MapInfo from = mapInfos_of_layer[from_layer_idx][from_map_idx];
@@ -65,7 +67,7 @@ public class HierarchyInfo
 
 			while (true)
 			{
-				int idx = Random.Range(0, choose_list.Count);
+				int idx = UnityEngine.Random.Range(0, choose_list.Count);
 				MapInfo to = choose_list[idx];
 				if (!from.connected_map_list.Contains(to))
 				{
@@ -118,7 +120,7 @@ public class HierarchyInfo
 
 	public void Connect(HierarchyInfo hierarchy)
 	{
-		int map_idx = Random.Range(0, mapInfos_of_layer[4].Count);
+		int map_idx = UnityEngine.Random.Range(0, mapInfos_of_layer[4].Count);
 		MapInfo from = mapInfos_of_layer[4][map_idx];
 
 		from.connected_map_list.Add(hierarchy.mapInfos_of_layer[0][0]);

@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
 public class Dungeon
 {
     public HierarchyInfo[] hierarchy_list;
@@ -25,6 +24,16 @@ public class Dungeon
                 foreach(MapInfo cur in this.hierarchy_list[i].mapInfos_of_layer[j])
                 {
                     ((SquareRoomMapInfo)cur).CreateStairs();
+                }
+            }
+        }
+        for (int i = 0; i < 5; i++)
+        {
+            for (int j = 0; j < 5; j++)
+            {
+                foreach (MapInfo cur in this.hierarchy_list[i].mapInfos_of_layer[j])
+                {
+                    ((SquareRoomMapInfo)cur).InitTerrainInfoArr();
                 }
             }
         }

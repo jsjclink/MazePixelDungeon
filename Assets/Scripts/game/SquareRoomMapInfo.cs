@@ -18,7 +18,6 @@ public class SquareSpaceInfo
     }
 }
 
-
 public class SquareRoomMapInfo : MapInfo
 {
     public List<SquareSpaceInfo> space_list;
@@ -38,38 +37,40 @@ public class SquareRoomMapInfo : MapInfo
         this.enemy_list = CreateEnemies(); //enemy 생성
 
         //star_list도 만들어야함 -> dungeon.cs에서 만듦 왜냐하면 hierarchy, layer 연결 다 끝나야 그걸 연결하는 stair를 만드니까
+        //InitTerrainInfoArr도 dungeon.cs에서 만듦. stair만들어지고 나서 call해야 하니깐
     }
 
-    private int[,] GetMapArr()
+    public void InitTerrainInfoArr()
     {
-        int[,] map = new int[height, width];
-        for (int i = 0; i < height; i++)
+        for(int i = 0; i < height; i++)
         {
-            for (int j = 0; j < width; j++)
+            for(int j = 0; j < width; j++)
             {
-                map[i, j] = 0; //EMPTY
+                this.terrain_info_arr[i, j] = new TerrainInfo(TERRAIN_TYPE.EMPTY, SPECIFIC_TERRAIN_TYPE.NONE, j, i);
             }
         }
 
-        //space를 그림
+        //space 그림
         foreach (SquareSpaceInfo cur in this.space_list)
         {
             for (int i = cur.start_y; i < cur.end_y; i++)
             {
                 for (int j = cur.start_x; j < cur.end_x; j++)
                 {
-                    if (i == cur.start_y || j == cur.start_x || i == cur.end_y - 1 || j == cur.end_x - 1) map[i, j] = 2; // wall
-                    else map[i, j] = 1; //FLOOR
+                    if (j == cur.start_x) this.terrain_info_arr[i, j] = new TerrainInfo(TERRAIN_TYPE.WALL, SPECIFIC_TERRAIN_TYPE.WALL_LEFT, j, i);
+                    else if (j == cur.end_x - 1) this.terrain_info_arr[i, j] = new TerrainInfo(TERRAIN_TYPE.WALL, SPECIFIC_TERRAIN_TYPE.WALL_RIGHT, j, i);
+                    else if (i == cur.start_y) this.terrain_info_arr[i, j] = new TerrainInfo(TERRAIN_TYPE.WALL, SPECIFIC_TERRAIN_TYPE.WALL_TOP, j, i);
+                    else if (i == cur.end_y - 1) this.terrain_info_arr[i, j] = new TerrainInfo(TERRAIN_TYPE.WALL, SPECIFIC_TERRAIN_TYPE.WALL_BOTTOM, j, i);
+                    else this.terrain_info_arr[i, j] = new TerrainInfo(TERRAIN_TYPE.FLOOR, SPECIFIC_TERRAIN_TYPE.NONE, j, i);
                 }
             }
         }
 
         //stair를 그림
-        foreach(StairInfo cur in this.stair_list)
+        foreach (StairInfo cur in this.stair_list)
         {
-            map[cur.pos_y, cur.pos_x] = 5; //STAIR
+            this.terrain_info_arr[cur.pos_y, cur.pos_x] = new TerrainInfo(TERRAIN_TYPE.STAIR, SPECIFIC_TERRAIN_TYPE.NONE, cur.pos_x, cur.pos_y);
         }
-
 
         //bridge를 그림
         foreach (BridgeInfo cur in this.bridge_list)
@@ -78,25 +79,14 @@ public class SquareRoomMapInfo : MapInfo
             {
                 int x = cur.path_arr[i].Item1;
                 int y = cur.path_arr[i].Item2;
-                if (map[y, x] == 2) map[y, x] = 4; //DOOR
-                else if (map[y, x] == 0) map[y, x] = 3; //BRIDGE
-            }
-        }
 
-        //주변에 bridge가 없으면 문을 없앰 (벽 끝에 연속적으로 생성된 문을 floor로 바꿈)
-        foreach (SquareSpaceInfo cur in this.space_list)
-        {
-            for (int i = cur.start_y; i < cur.end_y; i++)
-            {
-                for (int j = cur.start_x; j < cur.end_x; j++)
+                if (this.terrain_info_arr[y, x].terrain_type == TERRAIN_TYPE.WALL)
                 {
-                    if (map[i, j] == 4)
-                    {
-                        if (map[i + 1, j] != 3 && map[i - 1, j] != 3 && map[i, j + 1] != 3 && map[i, j - 1] != 3) 
-                        {
-                            map[i, j] = 1; //FLOOR
-                        }
-                    }
+                    this.terrain_info_arr[y, x] = new TerrainInfo(TERRAIN_TYPE.DOOR, SPECIFIC_TERRAIN_TYPE.NONE, y, x);
+                }
+                else if(this.terrain_info_arr[y, x].terrain_type == TERRAIN_TYPE.EMPTY)
+                {
+                    this.terrain_info_arr[y, x] = new TerrainInfo(TERRAIN_TYPE.BRIDGE, SPECIFIC_TERRAIN_TYPE.NONE, y, x);
                 }
             }
         }
@@ -108,23 +98,20 @@ public class SquareRoomMapInfo : MapInfo
             {
                 for (int j = cur.start_x; j < cur.end_x; j++)
                 {
-                    if (map[i, j] == 4)
+                    if (this.terrain_info_arr[i, j].terrain_type == TERRAIN_TYPE.DOOR)
                     {
-                        if (map[i + 1, j] != 2 && map[i - 1, j] != 2 && map[i, j + 1] != 2 && map[i, j - 1] != 2)
+                        if (this.terrain_info_arr[i + 1, j].terrain_type != TERRAIN_TYPE.WALL &&
+                            this.terrain_info_arr[i - 1, j].terrain_type != TERRAIN_TYPE.WALL &&
+                            this.terrain_info_arr[i, j + 1].terrain_type != TERRAIN_TYPE.WALL &&
+                            this.terrain_info_arr[i, j - 1].terrain_type != TERRAIN_TYPE.WALL)
                         {
-                            map[i, j] = 1; //FLOOR
+                            this.terrain_info_arr[i, j] = new TerrainInfo(TERRAIN_TYPE.FLOOR, SPECIFIC_TERRAIN_TYPE.NONE, j, i);
                         }
                     }
                 }
             }
         }
 
-        return map;
-    }
-
-    public (int[,], List<EnemyInfo>) GetMapInfos()
-    {
-        return (GetMapArr(), this.enemy_list);
     }
 
     private List<SquareSpaceInfo> DivideRect(SquareSpaceInfo cur, bool vertical)
@@ -137,8 +124,8 @@ public class SquareRoomMapInfo : MapInfo
 
         if (vertical)
         {
-            int weight1 = Random.Range(1, 3);
-            int weight2 = Random.Range(1, 3);
+            int weight1 = UnityEngine.Random.Range(1, 3);
+            int weight2 = UnityEngine.Random.Range(1, 3);
             int mid = (cur.start_x * weight1 + cur.end_x * weight2) / (weight1 + weight2);
 
             bool divide_vertical;
@@ -171,8 +158,8 @@ public class SquareRoomMapInfo : MapInfo
         }
         else
         {
-            int weight1 = Random.Range(1, 3);
-            int weight2 = Random.Range(1, 3);
+            int weight1 = UnityEngine.Random.Range(1, 3);
+            int weight2 = UnityEngine.Random.Range(1, 3);
             int mid = (cur.start_y * weight1 + cur.end_y * weight2) / (weight1 + weight2);
 
             bool divide_vertical;
@@ -207,7 +194,7 @@ public class SquareRoomMapInfo : MapInfo
     }
     private void RemoveRandomSpace()
     {
-        space_list.RemoveAt(Random.Range(0, space_list.Count));
+        space_list.RemoveAt(UnityEngine.Random.Range(0, space_list.Count));
     }
 
     private void AddPaddingToRoom(int top, int bottom, int left, int right)
@@ -247,10 +234,10 @@ public class SquareRoomMapInfo : MapInfo
         List<EnemyInfo> enemy_list = new List<EnemyInfo>();
         for (int i = 0; i < 10; i++)
         {
-            int idx = Random.Range(0, space_list.Count);
-            int spawn_x = Random.Range(space_list[idx].start_x + 1, space_list[idx].end_x - 1);
-            int spawn_y = Random.Range(space_list[idx].start_y + 1, space_list[idx].end_y - 1);
-            enemy_list.Add(new EnemyInfo(spawn_x, spawn_y));
+            int idx = UnityEngine.Random.Range(0, space_list.Count);
+            int spawn_x = UnityEngine.Random.Range(space_list[idx].start_x + 1, space_list[idx].end_x - 1);
+            int spawn_y = UnityEngine.Random.Range(space_list[idx].start_y + 1, space_list[idx].end_y - 1);
+            enemy_list.Add(new EnemyInfo(spawn_x, spawn_y, this.hierarchy_idx, this.layer_idx, this.map_idx));
         }
         return enemy_list;
     }
@@ -261,9 +248,9 @@ public class SquareRoomMapInfo : MapInfo
 
         foreach(MapInfo to in this.connected_map_list)
         {
-            int idx = Random.Range(0, space_list.Count);
-            int spawn_x = Random.Range(space_list[idx].start_x + 1, space_list[idx].end_x - 1);
-            int spawn_y = Random.Range(space_list[idx].start_y + 1, space_list[idx].end_y - 1);
+            int idx = UnityEngine.Random.Range(0, space_list.Count);
+            int spawn_x = UnityEngine.Random.Range(space_list[idx].start_x + 1, space_list[idx].end_x - 1);
+            int spawn_y = UnityEngine.Random.Range(space_list[idx].start_y + 1, space_list[idx].end_y - 1);
             stair_list.Add(new StairInfo(spawn_x, spawn_y, to));
         }
 

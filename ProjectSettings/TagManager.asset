@@ -44,3 +44,6 @@ TagManager:
   - name: unit
     uniqueID: 2372792783
     locked: 0
+  - name: shadow
+    uniqueID: 469482543
+    locked: 0

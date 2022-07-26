@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
 public class BridgeInfo
 {
     public SquareSpaceInfo from_space;
