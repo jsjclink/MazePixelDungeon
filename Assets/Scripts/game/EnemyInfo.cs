@@ -16,9 +16,9 @@ public class EnemyInfo: UnitInfo{
 
     public List<(int, int)> cur_path;
 
-    public EnemyInfo(int x, int y, int hierarchy_idx, int layer_idx, int map_idx)
+    public EnemyInfo(UNIT_TYPE unit_type, int x, int y, int hierarchy_idx, int layer_idx, int map_idx)
     {
-        this.unit_type = UNIT_TYPE.ENEMY_CRAB;
+        this.unit_type = unit_type;
         this.hierarchy_idx = hierarchy_idx;
         this.layer_idx = layer_idx;
         this.map_idx = map_idx;

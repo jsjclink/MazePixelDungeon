@@ -91,7 +91,7 @@ public class SquareRoomMapInfo : MapInfo
             }
         }
 
-        //주변에 wall이 없으면 문을 없앰
+        //주변에 wall이 2개 이상 없으면 문을 없앰
         foreach (SquareSpaceInfo cur in space_list)
         {
             for (int i = cur.start_y; i < cur.end_y; i++)
@@ -100,13 +100,13 @@ public class SquareRoomMapInfo : MapInfo
                 {
                     if (this.terrain_info_arr[i, j].terrain_type == TERRAIN_TYPE.DOOR)
                     {
-                        if (this.terrain_info_arr[i + 1, j].terrain_type != TERRAIN_TYPE.WALL &&
-                            this.terrain_info_arr[i - 1, j].terrain_type != TERRAIN_TYPE.WALL &&
-                            this.terrain_info_arr[i, j + 1].terrain_type != TERRAIN_TYPE.WALL &&
-                            this.terrain_info_arr[i, j - 1].terrain_type != TERRAIN_TYPE.WALL)
-                        {
-                            this.terrain_info_arr[i, j] = new TerrainInfo(TERRAIN_TYPE.FLOOR, SPECIFIC_TERRAIN_TYPE.NONE, j, i);
-                        }
+                        int wall_cnt = 0;
+                        if (this.terrain_info_arr[i + 1, j].terrain_type == TERRAIN_TYPE.WALL) wall_cnt++;
+                        if (this.terrain_info_arr[i - 1, j].terrain_type == TERRAIN_TYPE.WALL) wall_cnt++;
+                        if (this.terrain_info_arr[i, j + 1].terrain_type == TERRAIN_TYPE.WALL) wall_cnt++;
+                        if (this.terrain_info_arr[i, j - 1].terrain_type == TERRAIN_TYPE.WALL) wall_cnt++;
+
+                        if(wall_cnt < 2) this.terrain_info_arr[i, j] = new TerrainInfo(TERRAIN_TYPE.FLOOR, SPECIFIC_TERRAIN_TYPE.NONE, j, i);
                     }
                 }
             }
@@ -237,7 +237,9 @@ public class SquareRoomMapInfo : MapInfo
             int idx = UnityEngine.Random.Range(0, space_list.Count);
             int spawn_x = UnityEngine.Random.Range(space_list[idx].start_x + 1, space_list[idx].end_x - 1);
             int spawn_y = UnityEngine.Random.Range(space_list[idx].start_y + 1, space_list[idx].end_y - 1);
-            enemy_list.Add(new EnemyInfo(spawn_x, spawn_y, this.hierarchy_idx, this.layer_idx, this.map_idx));
+            //수 바뀌면 바꿔줘야함
+            UNIT_TYPE unit_type = (UNIT_TYPE)Random.Range(1, 4);
+            enemy_list.Add(new EnemyInfo(unit_type, spawn_x, spawn_y, this.hierarchy_idx, this.layer_idx, this.map_idx));
         }
         return enemy_list;
     }

@@ -1653,7 +1653,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &905380993
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1987,7 +1987,7 @@ RectTransform:
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -3212,6 +3212,8 @@ MonoBehaviour:
   door_prefab: {fileID: 8065170049285674915, guid: ed9d7b159cdfefe45b16c5c767450bb9, type: 3}
   stair_prefab: {fileID: 4038738027710592003, guid: 3f9dd024e8d255f44bac16cfc4b2fffb, type: 3}
   shadow_prefab: {fileID: 992352599958091811, guid: 800d13c7dab407e41b237aa6fdb9bac0, type: 3}
+  enemy_rat_prefab: {fileID: 7764625810204926561, guid: c6bcaa5a16cc23840b1f890f7df5c6c6, type: 3}
+  enemy_gnoll_prefab: {fileID: 3327368212741128572, guid: 9cd75f91bb1acac4fbde4bc90a997d1b, type: 3}
   enemy_crab_prefab: {fileID: 2215931942538672318, guid: bd9c9c4a065f4b3429c15c3fdbf680c1, type: 3}
   player_object: {fileID: 1054705958}
   cam: {fileID: 519420031}

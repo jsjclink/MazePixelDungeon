@@ -128,7 +128,12 @@ public class GameSystemManager : MonoBehaviour
     GameObject shadow_prefab;
 
     [SerializeField]
+    GameObject enemy_rat_prefab;
+    [SerializeField]
+    GameObject enemy_gnoll_prefab;
+    [SerializeField]
     GameObject enemy_crab_prefab;
+
 
     [SerializeField]
     GameObject player_object;
@@ -189,7 +194,6 @@ public class GameSystemManager : MonoBehaviour
                 break;
             case TOUCH_INPUT_TYPE.PLAYER_MOVE_TO_POS:
                 this.player_info.SetPathTo((int)touch_info.move_to_pos.x, (int)touch_info.move_to_pos.y, this.terrain_info_arr, enemy_list);
-                Debug.Log("CUR PATH COUNT !!!!! : " + player_info.cur_path.Count);
                 if(this.player_info.cur_path.Count != 0)
                 {
                     this.player_info.SetState(UNIT_STATE.MOVING);
@@ -222,7 +226,6 @@ public class GameSystemManager : MonoBehaviour
                 switch (turn_info.turn_type)
                 {
                     case TURN_TYPE.PLAYER_TURN:
-                        Debug.Log(2);
                         Debug.Log("turn_queue.Count : " + turn_queue.Count);
                         if (this.player_info.unit_state == UNIT_STATE.IDLE || this.player_info.unit_state == UNIT_STATE.SLEEPING) break;
                         switch (this.player_info.unit_state)
@@ -247,7 +250,12 @@ public class GameSystemManager : MonoBehaviour
                                 break;
                             case UNIT_STATE.ENGAGING:
                                 Debug.Log("ATTACKED ENEMY");
-
+                                this.player_info.engaging_unit.hp -= 5;
+                                if (this.player_info.engaging_unit.hp <= 0)
+                                {
+                                    Destroy(enemy_object_dict[this.player_info.engaging_unit]);
+                                    enemy_list.Remove(this.player_info.engaging_unit);
+                                }
                                 this.player_info.SetState(UNIT_STATE.IDLE);
                                 break;
                             case UNIT_STATE.SLEEPING:
@@ -341,17 +349,16 @@ public class GameSystemManager : MonoBehaviour
             cam.transform.position = new Vector3(this.player_info.pos_x, this.player_info.pos_y, -10);
         }
         foreach (EnemyInfo enemy in enemy_list)
-        {
-            enemy_object_dict[enemy].transform.position = new Vector3(enemy.pos_x, enemy.pos_y, 0);
-            /*
+        {           
             if (this.terrain_info_arr[enemy.pos_y, enemy.pos_x].in_player_sight)
             {
                 this.enemy_object_dict[enemy].SetActive(true);
+                enemy_object_dict[enemy].transform.position = new Vector3(enemy.pos_x, enemy.pos_y, 0);
             }
             else
             {
-                //this.enemy_object_dict[enemy].SetActive(false);
-            }*/
+                this.enemy_object_dict[enemy].SetActive(false);
+            }
         }
         
         for (int i = 0; i < this.terrain_object_arr.GetLength(0); i++)
@@ -489,16 +496,28 @@ public class GameSystemManager : MonoBehaviour
                     this.terrain_object_arr[i, j] = Instantiate(stair_prefab, new Vector3(j, i, 0), Quaternion.identity);
                 }
             }
-        }  
+        }
 
         //draw enemies
         foreach (EnemyInfo cur in this.enemy_list)
         {
-           enemy_object_dict[cur] = Instantiate(enemy_crab_prefab, new Vector3(cur.pos_x, cur.pos_y, 0), Quaternion.identity);
+            Debug.Log(cur.unit_type);
+            switch (cur.unit_type)
+            {
+                case UNIT_TYPE.ENEMY_RAT:
+                    enemy_object_dict[cur] = Instantiate(enemy_rat_prefab, new Vector3(cur.pos_x, cur.pos_y, 0), Quaternion.identity);
+                    break;
+                case UNIT_TYPE.ENEMY_GNOLL:
+                    enemy_object_dict[cur] = Instantiate(enemy_gnoll_prefab, new Vector3(cur.pos_x, cur.pos_y, 0), Quaternion.identity);
+                    break;
+                case UNIT_TYPE.ENEMY_CRAB:
+                    enemy_object_dict[cur] = Instantiate(enemy_crab_prefab, new Vector3(cur.pos_x, cur.pos_y, 0), Quaternion.identity);
+                    break;
+            }
         }
 
         //draw shadow
-        
+
         for (int i = 0; i < this.terrain_object_arr.GetLength(0); i++)
         {
             for (int j = 0; j < this.terrain_object_arr.GetLength(1); j++)
@@ -682,7 +701,6 @@ public class GameSystemManager : MonoBehaviour
                 }
                 else if(dx*dx + dy*dy < 20)
                 {
-                    Debug.Log("playersight : " + player_info.PlayerSight(j, i, terrain_info_arr));
                     if (player_info.PlayerSight(j, i, terrain_info_arr))
                     {
                         terrain_info_arr[i, j].visited = true;
@@ -731,7 +749,18 @@ public class GameSystemManager : MonoBehaviour
         //create enemy objects
         foreach (EnemyInfo cur in this.enemy_list)
         {
-            enemy_object_dict[cur] = Instantiate(enemy_crab_prefab, new Vector3(cur.pos_x, cur.pos_y, 0), Quaternion.identity);
+            Debug.Log(cur.unit_type);
+            switch (cur.unit_type) {   
+                case UNIT_TYPE.ENEMY_RAT:
+                    enemy_object_dict[cur] = Instantiate(enemy_rat_prefab, new Vector3(cur.pos_x, cur.pos_y, 0), Quaternion.identity);
+                    break;
+                case UNIT_TYPE.ENEMY_GNOLL:
+                    enemy_object_dict[cur] = Instantiate(enemy_gnoll_prefab, new Vector3(cur.pos_x, cur.pos_y, 0), Quaternion.identity);
+                    break;
+                case UNIT_TYPE.ENEMY_CRAB:
+                    enemy_object_dict[cur] = Instantiate(enemy_crab_prefab, new Vector3(cur.pos_x, cur.pos_y, 0), Quaternion.identity);
+                    break;
+            }  
         }
 
         //create shadows
@@ -778,7 +807,6 @@ public class GameSystemManager : MonoBehaviour
                 }
                 else if (dx * dx + dy * dy < 20)
                 {
-                    Debug.Log("playersight : " + player_info.PlayerSight(j, i, terrain_info_arr));
                     if (player_info.PlayerSight(j, i, terrain_info_arr))
                     {
                         terrain_info_arr[i, j].visited = true;
