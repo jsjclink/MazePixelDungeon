@@ -17,11 +17,14 @@ public class PlayerInfo: UnitInfo{
 
     public EnemyInfo engaging_unit;
 
+    public ANIMATION_STATE animation_state;
+
     public PlayerInfo()
     {
         this.unit_type = UNIT_TYPE.PLAYER;
         this.cur_path = new List<(int, int)>();
         this.unit_state = UNIT_STATE.IDLE;
+        this.animation_state = ANIMATION_STATE.IDLE;
     }
     public PlayerInfo(int hierarchy_idx, int layer_idx, int map_idx, int hp, int attack_pt, int pos_x, int pos_y)
     {
@@ -35,6 +38,7 @@ public class PlayerInfo: UnitInfo{
         this.attack_pt = attack_pt;
         this.pos_x = pos_x;
         this.pos_y = pos_y;
+        this.animation_state = ANIMATION_STATE.IDLE;
     }
 
     public void SetPos(int x, int y)

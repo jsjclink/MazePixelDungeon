@@ -10,6 +10,10 @@ public enum UNIT_STATE
 {
     IDLE, MOVING, ENGAGING, SLEEPING
 }
+public enum ANIMATION_STATE
+{
+    IDLE, MOVING, ENGAGING, SLEEPING
+}
 
 public class UnitInfo
 {

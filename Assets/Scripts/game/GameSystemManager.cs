@@ -159,11 +159,13 @@ public class GameSystemManager : MonoBehaviour
     int game_idx;
     bool game_loaded;
     int seed;
+    bool turn_passed;
 
     void Start()
     {
         turn_queue = new Queue<TurnInfo>();
         prev_action_time = Time.time;
+        turn_passed = false;
 
         Application.targetFrameRate = 20; // 배터리 최적화
 
@@ -248,6 +250,7 @@ public class GameSystemManager : MonoBehaviour
                         switch (this.player_info.unit_state)
                         {
                             case UNIT_STATE.IDLE:
+                                this.player_info.animation_state = ANIMATION_STATE.IDLE;
                                 break;
                             case UNIT_STATE.MOVING:
                                 Debug.Log("cur_path.count : " + this.player_info.cur_path.Count);
@@ -262,8 +265,9 @@ public class GameSystemManager : MonoBehaviour
                                         this.player_info.SetPos(this.player_info.cur_path[0].Item1, this.player_info.cur_path[0].Item2);
                                         this.player_info.cur_path.RemoveAt(0);
                                     }
-                                }      
+                                }
                                 if(this.player_info.cur_path.Count == 0) this.player_info.SetState(UNIT_STATE.IDLE);
+                                this.player_info.animation_state = ANIMATION_STATE.MOVING;
                                 break;
                             case UNIT_STATE.ENGAGING:
                                 Debug.Log("ATTACKED ENEMY");
@@ -274,6 +278,7 @@ public class GameSystemManager : MonoBehaviour
                                     enemy_list.Remove(this.player_info.engaging_unit);
                                 }
                                 this.player_info.SetState(UNIT_STATE.IDLE);
+                                this.player_info.animation_state = ANIMATION_STATE.ENGAGING;
                                 break;
                             case UNIT_STATE.SLEEPING:
                                 break;
@@ -356,44 +361,77 @@ public class GameSystemManager : MonoBehaviour
                     }
                 }
                 prev_action_time = Time.time;
+                turn_passed = true;
             }
         }
 
-        //draw
-        if (player_object.transform.position.x != this.player_info.pos_x || player_object.transform.position.y != this.player_info.pos_y)
+        if (turn_passed)
         {
-            player_object.transform.position = new Vector3(this.player_info.pos_x, this.player_info.pos_y, 0);
-            cam.transform.position = new Vector3(this.player_info.pos_x, this.player_info.pos_y, -10);
-        }
-        foreach (EnemyInfo enemy in enemy_list)
-        {           
-            if (this.terrain_info_arr[enemy.pos_y, enemy.pos_x].in_player_sight)
+            Debug.Log("turn_passed");
+            //animation set
+            switch (this.player_info.animation_state)
             {
-                this.enemy_object_dict[enemy].SetActive(true);
-                enemy_object_dict[enemy].transform.position = new Vector3(enemy.pos_x, enemy.pos_y, 0);
+                case ANIMATION_STATE.IDLE:
+                    this.player_object.GetComponent<Animator>().SetInteger("player_state", 0);
+                    break;
+                case ANIMATION_STATE.MOVING:
+                    int dx1 = this.player_info.pos_x - (int)this.player_object.transform.position.x;
+                    if (dx1 > 0) this.player_object.GetComponent<SpriteRenderer>().flipX = false;
+                    else this.player_object.GetComponent<SpriteRenderer>().flipX = true;
+                    this.player_object.GetComponent<Animator>().SetInteger("player_state", 1);
+                    StartCoroutine(ResetAnimation());
+                    break;
+                case ANIMATION_STATE.ENGAGING:
+                    int dx2 = this.player_info.engaging_unit.pos_x - this.player_info.pos_x;
+                    if (dx2 > 0) this.player_object.GetComponent<SpriteRenderer>().flipX = false;
+                    else this.player_object.GetComponent<SpriteRenderer>().flipX = true;
+                    this.player_object.GetComponent<Animator>().SetInteger("player_state", 2);
+                    StartCoroutine(ResetAnimation());
+                    break;
+                case ANIMATION_STATE.SLEEPING:
+                    break;
             }
-            else
+            this.player_info.animation_state = ANIMATION_STATE.IDLE;
+
+            //draw
+            if (player_object.transform.position.x != this.player_info.pos_x || player_object.transform.position.y != this.player_info.pos_y)
             {
-                this.enemy_object_dict[enemy].SetActive(false);
+                player_object.transform.position = new Vector3(this.player_info.pos_x, this.player_info.pos_y, 0);
+                cam.transform.position = new Vector3(this.player_info.pos_x, this.player_info.pos_y, -10);
             }
+            foreach (EnemyInfo enemy in enemy_list)
+            {
+                if (this.terrain_info_arr[enemy.pos_y, enemy.pos_x].in_player_sight)
+                {
+                    this.enemy_object_dict[enemy].SetActive(true);
+                    enemy_object_dict[enemy].transform.position = new Vector3(enemy.pos_x, enemy.pos_y, 0);
+                }
+                else
+                {
+                    this.enemy_object_dict[enemy].SetActive(false);
+                }
+            }
+
+            for (int i = 0; i < this.terrain_object_arr.GetLength(0); i++)
+            {
+                for (int j = 0; j < this.terrain_object_arr.GetLength(1); j++)
+                {
+                    if (terrain_info_arr[i, j].in_player_sight)
+                    {
+                        Color color = this.shadow_object_arr[i, j].GetComponent<SpriteRenderer>().color;
+                        this.shadow_object_arr[i, j].GetComponent<SpriteRenderer>().color = new Color(color.r, color.g, color.b, 0.0f);
+                    }
+                    else if (this.terrain_info_arr[i, j].visited)
+                    {
+                        Color color = this.shadow_object_arr[i, j].GetComponent<SpriteRenderer>().color;
+                        this.shadow_object_arr[i, j].GetComponent<SpriteRenderer>().color = new Color(color.r, color.g, color.b, 0.5f);
+                    }
+                }
+            }
+
+            turn_passed = false;
         }
         
-        for (int i = 0; i < this.terrain_object_arr.GetLength(0); i++)
-        {
-            for (int j = 0; j < this.terrain_object_arr.GetLength(1); j++)
-            {
-                if (terrain_info_arr[i, j].in_player_sight)
-                {
-                    Color color = this.shadow_object_arr[i, j].GetComponent<SpriteRenderer>().color;
-                    this.shadow_object_arr[i, j].GetComponent<SpriteRenderer>().color = new Color(color.r, color.g, color.b, 0.0f);
-                }
-                else if(this.terrain_info_arr[i, j].visited)
-                {
-                    Color color = this.shadow_object_arr[i, j].GetComponent<SpriteRenderer>().color;
-                    this.shadow_object_arr[i, j].GetComponent<SpriteRenderer>().color = new Color(color.r, color.g, color.b, 0.5f);
-                }
-            }
-        }
     }
 
     private void ChangeMap(MapInfo from, MapInfo to)
@@ -836,5 +874,12 @@ public class GameSystemManager : MonoBehaviour
                 }
             }
         }
+    }
+
+    IEnumerator ResetAnimation()
+    {
+        yield return new WaitForSeconds(0.15f);
+        Debug.Log("RESETANIMATION");
+        this.player_object.GetComponent<Animator>().SetInteger("player_state", 0);
     }
 }
