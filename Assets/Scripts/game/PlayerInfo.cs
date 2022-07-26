@@ -23,6 +23,20 @@ public class PlayerInfo: UnitInfo{
         this.cur_path = new List<(int, int)>();
         this.unit_state = UNIT_STATE.IDLE;
     }
+    public PlayerInfo(int hierarchy_idx, int layer_idx, int map_idx, int hp, int attack_pt, int pos_x, int pos_y)
+    {
+        this.unit_type = UNIT_TYPE.PLAYER;
+        this.cur_path = new List<(int, int)>();
+        this.unit_state = UNIT_STATE.IDLE;
+        this.hierarchy_idx = hierarchy_idx;
+        this.layer_idx = layer_idx;
+        this.map_idx = map_idx;
+        this.hp = hp;
+        this.attack_pt = attack_pt;
+        this.pos_x = pos_x;
+        this.pos_y = pos_y;
+    }
+
     public void SetPos(int x, int y)
     {
         this.pos_x = x;

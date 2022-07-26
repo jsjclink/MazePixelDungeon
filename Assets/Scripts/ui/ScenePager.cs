@@ -7,6 +7,7 @@ public class ScenePager : MonoBehaviour
 {
     public void ScenePagerToGame()
     {
+        SendingInfo.is_loaded = false;
         SceneManager.LoadScene(1);
     }
 

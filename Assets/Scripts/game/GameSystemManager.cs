@@ -157,6 +157,8 @@ public class GameSystemManager : MonoBehaviour
     Queue<TurnInfo> turn_queue;
 
     int game_idx;
+    bool game_loaded;
+    int seed;
 
     void Start()
     {
@@ -166,9 +168,24 @@ public class GameSystemManager : MonoBehaviour
         Application.targetFrameRate = 20; // 배터리 최적화
 
         //앞에 씬에서 받아옴
-        game_idx = 1;
-        bool game_loaded = false;
+        //game_idx = 1;
+        //game_loaded = false;
 
+        game_loaded = SendingInfo.is_loaded;
+        if(game_loaded) game_idx = int.Parse(SendingInfo.name.Split('_')[1]);
+        else
+        {
+            int max = 0;
+            DirectoryInfo di = new DirectoryInfo(Application.persistentDataPath + "/");
+            foreach (FileInfo File in di.GetFiles())
+            {
+                Debug.Log(File.Name);
+                int file_idx = int.Parse(File.Name.Split('.')[0].Split('_')[1]);
+                if (max < file_idx) max = file_idx;
+            }
+            game_idx = max + 1;
+            Debug.Log("GAMEIDX : " + game_idx);
+        }
         //InitGame에서 해줌
         //terrain_info_arr = new TerrainInfo[0, 0];
         //terrain_object_arr = new GameObject[0, 0];
@@ -285,7 +302,7 @@ public class GameSystemManager : MonoBehaviour
                             output += cur.turn_type + ",";
                         }
                         Debug.Log(output);
-                        SaveData(this.game_idx);
+                        SaveData();
                         break;
                     case TURN_TYPE.ENEMY_TURN:
                         this.player_info.hp -= 5;
@@ -592,26 +609,14 @@ public class GameSystemManager : MonoBehaviour
         return touch_info;
     }
 
-    public void SaveData(int game_idx)
+    public void SaveData()
     {
-        //현재 enemy 위치를 정확하게 업데이트 해 주고 나서 저장!
+        //현재 enemy 위치를 정확하게 업데이트 해주고 나서 저장!
         this.cur_map_info.enemy_list = this.enemy_list;
-        SaveData data = new SaveData(this.dungeon, 10, this.player_info);
+        SaveData data = new SaveData(this.dungeon, this.seed, this.player_info);
         string json_string = JsonUtility.ToJson(data);
 
-        /*
-        int max = 0;
-        DirectoryInfo di = new DirectoryInfo(Application.persistentDataPath + "/");
-        foreach(FileInfo File in di.GetFiles())
-        {
-            Debug.Log(File.Name);
-            int file_idx = int.Parse(File.Name.Split('.')[0].Split('_')[1]);
-            if (max < file_idx) max = file_idx;
-        }
-        //꼭 고챠!!!!!!!!!
-        max = 9;*/
-
-        File.WriteAllText(Path.Combine(Application.persistentDataPath, "dungeondata_" + game_idx + ".Json"), json_string);
+        File.WriteAllText(Path.Combine(Application.persistentDataPath, "dungeondata_" + this.game_idx + ".Json"), json_string);
     }
 
     public void InitGame(bool game_loaded,int game_idx)
@@ -620,15 +625,17 @@ public class GameSystemManager : MonoBehaviour
         if (game_loaded)
         {
             string load_data = File.ReadAllText(Path.Combine(Application.persistentDataPath, "dungeondata_" + game_idx + ".Json"));
-
             SaveData data = JsonUtility.FromJson<SaveData>(load_data);
-
             SaveData.EnemySerializedList enemySerialized = data.enemySerialized;
             SaveData.SeedInfo seedInfo = data.seedInfo;
-
+            this.seed = seedInfo.seed;
             UnityEngine.Random.InitState(seedInfo.seed);
             Dungeon load_dungeon = new Dungeon(3);
-
+            //load data 했을 때 생성된 object들은 heap에 new로 할당된게 아니라서 없어지는것 같음
+            //그래서 단순 할당 하는게 아니라 
+            //load_dungeon.hierarchy_list[enemy.hierarchy_idx].mapInfos_of_layer[enemy.layer_idx][enemy.map_idx].enemy_list.Add(new EnemyInfo(enemy.unit_type, enemy.pos_x, enemy.pos_y, enemy.hierarchy_idx, enemy.layer_idx, enemy.map_idx));
+            //이거처럼 new로 해주는게 안전함
+            //player도 그냥 그렇게 해주면 좋을듯
             foreach (HierarchyInfo hierarchy in load_dungeon.hierarchy_list)
             {
                 foreach (List<MapInfo> map_linfo_list in hierarchy.mapInfos_of_layer)
@@ -636,30 +643,37 @@ public class GameSystemManager : MonoBehaviour
 
                     foreach (MapInfo map_info in map_linfo_list)
                     {
-                        map_info.enemy_list.Clear();
+                        map_info.enemy_list = new List<EnemyInfo>();
                     }
                 }
             }
             foreach (EnemyInfo enemy in enemySerialized.enemy_serialized_list)
             {
-                load_dungeon.hierarchy_list[enemy.hierarchy_idx].mapInfos_of_layer[enemy.layer_idx][enemy.map_idx].enemy_list.Add(enemy);
+                load_dungeon.hierarchy_list[enemy.hierarchy_idx].mapInfos_of_layer[enemy.layer_idx][enemy.map_idx].enemy_list.Add(new EnemyInfo(enemy.unit_type, enemy.pos_x, enemy.pos_y, enemy.hierarchy_idx, enemy.layer_idx, enemy.map_idx));
             }
-
+            this.player_info = new PlayerInfo(data.player_info.hierarchy_idx, data.player_info.layer_idx, data.player_info.map_idx, data.player_info.hp, data.player_info.attack_pt, data.player_info.pos_x, data.player_info.pos_y);
             this.dungeon = load_dungeon;
-            this.player_info = data.player_info;
             this.cur_map_info = this.dungeon.hierarchy_list[this.player_info.hierarchy_idx].mapInfos_of_layer[this.player_info.layer_idx][this.player_info.map_idx];
             this.terrain_info_arr = (TerrainInfo[,])this.cur_map_info.terrain_info_arr.Clone();
             this.enemy_list = new List<EnemyInfo>(this.cur_map_info.enemy_list);
-
+            /*
+            this.enemy_list = new List<EnemyInfo>();
+            foreach(EnemyInfo enemy in this.cur_map_info.enemy_list)
+            {
+                this.enemy_list.Add(enemy);
+            }*/
             this.terrain_object_arr = new GameObject[this.terrain_info_arr.GetLength(0), this.terrain_info_arr.GetLength(1)];
             this.shadow_object_arr = new GameObject[this.terrain_info_arr.GetLength(0), this.terrain_info_arr.GetLength(1)];
             this.enemy_object_dict = new Dictionary<EnemyInfo, GameObject>();
         }
         else
         {
+            this.seed = UnityEngine.Random.Range(0, 100000);
+            UnityEngine.Random.InitState(seed);
+
             int difficulty = 3;
             this.dungeon = new Dungeon(difficulty);
-            this.player_info = new PlayerInfo();
+            this.player_info = new PlayerInfo(0, 1, 0, 100, 5, 0, 0);
             this.cur_map_info = dungeon.hierarchy_list[0].mapInfos_of_layer[1][0];
             this.terrain_info_arr = this.cur_map_info.terrain_info_arr;
             this.enemy_list = this.cur_map_info.enemy_list;
@@ -764,7 +778,6 @@ public class GameSystemManager : MonoBehaviour
         }
 
         //create shadows
-        
         for (int i = 0; i < this.terrain_object_arr.GetLength(0); i++)
         {
             for (int j = 0; j < this.terrain_object_arr.GetLength(1); j++)
