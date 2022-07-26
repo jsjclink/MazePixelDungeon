@@ -105,19 +105,11 @@ public class PlayerInfo: UnitInfo{
     }
     public bool PlayerSight(int target_x, int target_y, TerrainInfo[,] map)
     {
-        if (target_x == this.pos_x && target_y == this.pos_y) return true;
         int height = map.GetLength(0); int width = map.GetLength(1);
         int[] dx = { 0, 1, 1, 1, 0, -1, -1, -1 };
         int[] dy = { 1, 1, 0, -1, -1, -1, 0, 1 };
 
         bool[,] visited = new bool[height, width];
-        for (int i = 0; i < height; i++)
-        {
-            for (int j = 0; j < width; j++)
-            {
-                visited[i, j] = false;
-            }
-        }
         visited[this.pos_y, this.pos_x] = true;
 
         (int, int)[,] prev = new (int, int)[height, width];
@@ -137,7 +129,6 @@ public class PlayerInfo: UnitInfo{
             (int, int) cur = queue.Dequeue();
             int x = cur.Item1;
             int y = cur.Item2;
-            if (x == target_x && y == target_y) break;
 
             for (int i = 0; i < 8; i++)
             {
@@ -152,9 +143,8 @@ public class PlayerInfo: UnitInfo{
             }
         }
 
-        //(int, int) cur_pt = (target_x, target_y);
         if (prev[target_y, target_x] == (-1, -1)) return false;
-        (int, int) cur_pt = prev[target_x, target_y];
+        (int, int) cur_pt = prev[target_y, target_x];
 
         while (true)
         {
@@ -162,7 +152,7 @@ public class PlayerInfo: UnitInfo{
             int y = cur_pt.Item2;
             if (x == -1 || y == -1) break;
             if ((x, y) == (this.pos_x, this.pos_y)) break;
-            Debug.Log(map[y, x].terrain_type);
+
             if (map[y, x].terrain_type == TERRAIN_TYPE.WALL || map[y, x].terrain_type == TERRAIN_TYPE.DOOR) return false;
             cur_pt = prev[y, x];
         }
