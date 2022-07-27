@@ -7,10 +7,11 @@ public class EquipOrUse : MonoBehaviour, IPointerClickHandler
     public void OnPointerClick(PointerEventData eventData)
     {
         Inventory inven = GameObject.Find("Inventory").GetComponent<Inventory>();
-        int idx = int.Parse(transform.parent.parent.name.Split("_")[1]);
+        
 
         if (GetComponentInChildren<TMP_Text>().text == "EQUIP")
         {
+            int idx = int.Parse(transform.parent.parent.name.Split("_")[1]);
             switch (inven.items[idx].item_type)
             {
                 case (ITEM_TYPE.WEAPON):
@@ -79,6 +80,13 @@ public class EquipOrUse : MonoBehaviour, IPointerClickHandler
                     }
                     break;
             }
+        }
+        else if(GetComponentInChildren<TMP_Text>().text == "UNEQUIP")
+        {
+            inven.items.Add(GameObject.Find(this.transform.parent.parent.name.Split('_')[0].ToString()).transform.GetChild(0).GetComponent<EquipSlot>().item);
+            GameObject.Find(this.transform.parent.parent.name.Split('_')[0].ToString()).transform.GetChild(0).GetComponent<EquipSlot>().item = null;
+            inven.FreeSlot();
+            Destroy(this.transform.parent.parent.gameObject);
         }
 
     }
