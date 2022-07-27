@@ -1,0 +1,33 @@
+fileFormatVersion: 2
+guid: 4f7c4c63815e0e942af4c1aaf682d421
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - empty_prefab: {instanceID: 0}
+  - floor_prefab: {instanceID: 0}
+  - wall_prefab: {fileID: 3221364860796858949, guid: 49e2246ec68d8704a90e126e101d6ca2, type: 3}
+  - wall_left_prefab: {fileID: 2260790627535203235, guid: 33ec0dd1551f1c64b8eb5da359b3b2e3, type: 3}
+  - wall_right_prefab: {fileID: 7264525983256206142, guid: 29737ca22da0edf4d8b1ba577d3ba8bf, type: 3}
+  - bridge_prefab: {instanceID: 0}
+  - door_prefab: {instanceID: 0}
+  - stair_prefab: {instanceID: 0}
+  - shadow_prefab: {instanceID: 0}
+  - enemy_rat_prefab: {instanceID: 0}
+  - enemy_gnoll_prefab: {instanceID: 0}
+  - enemy_crab_prefab: {instanceID: 0}
+  - sword_01_prefab: {instanceID: 0}
+  - ax_01_prefab: {instanceID: 0}
+  - armor_01_prefab: {fileID: 264106623345289833, guid: c8671f07ad5e0b34283b97168d6ecb8e, type: 3}
+  - armor_02_prefab: {fileID: 5527191044481365534, guid: 8dbadf5efe700554a92d667bac43c38c, type: 3}
+  - artifact_01_prefab: {instanceID: 0}
+  - gold_prefab: {instanceID: 0}
+  - ring_01_prefab: {fileID: 8296374229807625939, guid: f1e1e88a2a4176140bf0f30a8a8d14e1, type: 3}
+  - ring_02_prefab: {fileID: 4475790950863425178, guid: 11a9d1f35dcf9d74fb0cf4f51dd0e189, type: 3}
+  - player_object: {instanceID: 0}
+  - cam: {instanceID: 0}
+  executionOrder: 100
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

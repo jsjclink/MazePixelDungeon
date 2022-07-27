@@ -19,15 +19,22 @@ public class PlayerInfo: UnitInfo{
 
     public ANIMATION_STATE animation_state;
 
+    public List<ItemInfo> item_list;
+
     public PlayerInfo()
     {
+        this.pos_x = 0;
+        this.pos_y = 0;
+        this.hierarchy_idx = 0;
+        this.layer_idx = 1;
+        this.map_idx = 0;
         this.unit_type = UNIT_TYPE.PLAYER;
         this.cur_path = new List<(int, int)>();
         this.unit_state = UNIT_STATE.IDLE;
         this.animation_state = ANIMATION_STATE.IDLE;
-        this.layer_idx = 1;
+        this.item_list = new List<ItemInfo>();
     }
-    public PlayerInfo(int hierarchy_idx, int layer_idx, int map_idx, int hp, int attack_pt, int pos_x, int pos_y)
+    public PlayerInfo(int hierarchy_idx, int layer_idx, int map_idx, int hp, int attack_pt, int pos_x, int pos_y, List<ItemInfo> item_list)
     {
         this.unit_type = UNIT_TYPE.PLAYER;
         this.cur_path = new List<(int, int)>();
@@ -40,6 +47,11 @@ public class PlayerInfo: UnitInfo{
         this.pos_x = pos_x;
         this.pos_y = pos_y;
         this.animation_state = ANIMATION_STATE.IDLE;
+        this.item_list = new List<ItemInfo>();
+        foreach (ItemInfo item in item_list)
+        {
+            this.item_list.Add(item);
+        }
     }
 
     public void SetPos(int x, int y)

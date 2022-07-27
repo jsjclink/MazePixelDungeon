@@ -134,6 +134,23 @@ public class GameSystemManager : MonoBehaviour
     [SerializeField]
     GameObject enemy_crab_prefab;
 
+    [SerializeField]
+    GameObject sword_01_prefab;
+    [SerializeField]
+    GameObject ax_01_prefab;
+    [SerializeField]
+    GameObject armor_01_prefab;
+    [SerializeField]
+    GameObject armor_02_prefab;
+    [SerializeField]
+    GameObject artifact_01_prefab;
+    [SerializeField]
+    GameObject gold_prefab;
+    [SerializeField]
+    GameObject ring_01_prefab;
+    [SerializeField]
+    GameObject ring_02_prefab;
+
 
     [SerializeField]
     GameObject player_object;
@@ -153,6 +170,8 @@ public class GameSystemManager : MonoBehaviour
     GameObject[,] shadow_object_arr;
     List<EnemyInfo> enemy_list;
     Dictionary<EnemyInfo, GameObject> enemy_object_dict;
+    List<ItemInfo> item_list;
+    Dictionary<ItemInfo, GameObject> item_object_dict;
 
     Queue<TurnInfo> turn_queue;
 
@@ -199,9 +218,6 @@ public class GameSystemManager : MonoBehaviour
 
     private void Update()
     {
-
-        Debug.Log(player_info.layer_idx);
-
         //get input
         TouchInfo touch_info = GetTouch();
 
@@ -229,6 +245,8 @@ public class GameSystemManager : MonoBehaviour
             case TOUCH_INPUT_TYPE.PLAYER_ENTER_STAIR:
                 ChangeMap(touch_info.from, touch_info.to);
                 this.player_info.SetState(UNIT_STATE.IDLE);
+                if (turn_queue.Count == 0) turn_queue.Enqueue(new TurnInfo(TURN_TYPE.PLAYER_TURN, this.player_info));
+                else { turn_queue = new Queue<TurnInfo>(); turn_queue.Enqueue(new TurnInfo(TURN_TYPE.PLAYER_TURN, this.player_info)); }
                 break;
             case TOUCH_INPUT_TYPE.PLAYER_ATTACK_ENEMY:
                 this.player_info.SetState(UNIT_STATE.ENGAGING, touch_info.enemy);
@@ -458,17 +476,23 @@ public class GameSystemManager : MonoBehaviour
         {
             Destroy(this.enemy_object_dict[cur]);
         }
+        foreach (ItemInfo cur in this.item_list)
+        {
+            Destroy(this.item_object_dict[cur]);
+        }
 
         //새로운 정보 init
         this.cur_map_info = to;
         this.terrain_info_arr = this.cur_map_info.terrain_info_arr;
         this.enemy_list = this.cur_map_info.enemy_list;
+        this.item_list = this.cur_map_info.item_list;
 
         this.terrain_object_arr = new GameObject[this.terrain_info_arr.GetLength(0), this.terrain_info_arr.GetLength(1)];
         this.shadow_object_arr = new GameObject[this.terrain_info_arr.GetLength(0), this.terrain_info_arr.GetLength(1)];
         this.enemy_object_dict = new Dictionary<EnemyInfo, GameObject>();
+        this.item_object_dict = new Dictionary<ItemInfo, GameObject>();
 
-        
+
         //player 위치 to맵으로
         this.player_info.hierarchy_idx = to.hierarchy_idx;
         this.player_info.layer_idx = to.layer_idx;
@@ -574,8 +598,30 @@ public class GameSystemManager : MonoBehaviour
             }
         }
 
-        //draw shadow
+        //create items
+        foreach (ItemInfo cur in this.item_list)
+        {
+            switch (cur.item_name)
+            {
+                case ITEM_NAME.SWORD_01:
+                    item_object_dict[cur] = Instantiate(sword_01_prefab, new Vector3(cur.pos_x, cur.pos_y, 0), Quaternion.identity);
+                    break;
+                case ITEM_NAME.AX_01:
+                    item_object_dict[cur] = Instantiate(ax_01_prefab, new Vector3(cur.pos_x, cur.pos_y, 0), Quaternion.identity);
+                    break;
+                case ITEM_NAME.ARMOR_01:
+                    item_object_dict[cur] = Instantiate(armor_01_prefab, new Vector3(cur.pos_x, cur.pos_y, 0), Quaternion.identity);
+                    break;
+                case ITEM_NAME.ARMOR_02:
+                    item_object_dict[cur] = Instantiate(armor_02_prefab, new Vector3(cur.pos_x, cur.pos_y, 0), Quaternion.identity);
+                    break;
+                case ITEM_NAME.ARTIFACT_01:
+                    item_object_dict[cur] = Instantiate(artifact_01_prefab, new Vector3(cur.pos_x, cur.pos_y, 0), Quaternion.identity);
+                    break;
+            }
+        }
 
+        //draw shadow
         for (int i = 0; i < this.terrain_object_arr.GetLength(0); i++)
         {
             for (int j = 0; j < this.terrain_object_arr.GetLength(1); j++)
@@ -615,7 +661,15 @@ public class GameSystemManager : MonoBehaviour
 
                     if (this.player_info.pos_x == (int)touch_pos.x && this.player_info.pos_y == (int)touch_pos.y) //나를 눌렀을 때
                     {
-                        if (terrain_info_arr[(int)touch_pos.y, (int)touch_pos.x].terrain_type == TERRAIN_TYPE.STAIR)   //그 위치가 계단과 같을 때
+                        if(FindItemAt((int)touch_pos.x, (int)touch_pos.y) != null)
+                        {
+                            ItemInfo item = FindItemAt((int)touch_pos.x, (int)touch_pos.y);
+                            this.player_info.item_list.Add(item);
+                            Destroy(item_object_dict[item]);
+                            item_list.Remove(item);
+                            Debug.Log("ITEM : " + this.player_info.item_list.Count);
+                        }
+                        else if (terrain_info_arr[(int)touch_pos.y, (int)touch_pos.x].terrain_type == TERRAIN_TYPE.STAIR)   //그 위치가 계단과 같을 때
                         {
                             foreach (StairInfo cur in this.cur_map_info.stair_list)
                             {
@@ -692,11 +746,12 @@ public class GameSystemManager : MonoBehaviour
             {
                 load_dungeon.hierarchy_list[enemy.hierarchy_idx].mapInfos_of_layer[enemy.layer_idx][enemy.map_idx].enemy_list.Add(new EnemyInfo(enemy.unit_type, enemy.pos_x, enemy.pos_y, enemy.hierarchy_idx, enemy.layer_idx, enemy.map_idx));
             }
-            this.player_info = new PlayerInfo(data.player_info.hierarchy_idx, data.player_info.layer_idx, data.player_info.map_idx, data.player_info.hp, data.player_info.attack_pt, data.player_info.pos_x, data.player_info.pos_y);
+            this.player_info = new PlayerInfo(data.player_info.hierarchy_idx, data.player_info.layer_idx, data.player_info.map_idx, data.player_info.hp, data.player_info.attack_pt, data.player_info.pos_x, data.player_info.pos_y, data.player_info.item_list);
             this.dungeon = load_dungeon;
             this.cur_map_info = this.dungeon.hierarchy_list[this.player_info.hierarchy_idx].mapInfos_of_layer[this.player_info.layer_idx][this.player_info.map_idx];
             this.terrain_info_arr = (TerrainInfo[,])this.cur_map_info.terrain_info_arr.Clone();
             this.enemy_list = new List<EnemyInfo>(this.cur_map_info.enemy_list);
+            this.item_list = this.cur_map_info.item_list;
             /*
             this.enemy_list = new List<EnemyInfo>();
             foreach(EnemyInfo enemy in this.cur_map_info.enemy_list)
@@ -706,6 +761,7 @@ public class GameSystemManager : MonoBehaviour
             this.terrain_object_arr = new GameObject[this.terrain_info_arr.GetLength(0), this.terrain_info_arr.GetLength(1)];
             this.shadow_object_arr = new GameObject[this.terrain_info_arr.GetLength(0), this.terrain_info_arr.GetLength(1)];
             this.enemy_object_dict = new Dictionary<EnemyInfo, GameObject>();
+            this.item_object_dict = new Dictionary<ItemInfo, GameObject>();
         }
         else
         {
@@ -714,14 +770,16 @@ public class GameSystemManager : MonoBehaviour
 
             int difficulty = 3;
             this.dungeon = new Dungeon(difficulty);
-            this.player_info = new PlayerInfo(0, 1, 0, 100, 5, 0, 0);
+            this.player_info = new PlayerInfo();
             this.cur_map_info = dungeon.hierarchy_list[0].mapInfos_of_layer[1][0];
             this.terrain_info_arr = this.cur_map_info.terrain_info_arr;
             this.enemy_list = this.cur_map_info.enemy_list;
+            this.item_list = this.cur_map_info.item_list;
 
             this.terrain_object_arr = new GameObject[this.terrain_info_arr.GetLength(0), this.terrain_info_arr.GetLength(1)];
             this.shadow_object_arr = new GameObject[this.terrain_info_arr.GetLength(0), this.terrain_info_arr.GetLength(1)];
             this.enemy_object_dict = new Dictionary<EnemyInfo, GameObject>();
+            this.item_object_dict = new Dictionary<ItemInfo, GameObject>();
         }
         //set player position
         if (game_loaded)
@@ -818,6 +876,29 @@ public class GameSystemManager : MonoBehaviour
             }  
         }
 
+        //create items
+        foreach (ItemInfo cur in this.item_list)
+        {
+            switch (cur.item_name)
+            {
+                case ITEM_NAME.SWORD_01:
+                    item_object_dict[cur] = Instantiate(sword_01_prefab, new Vector3(cur.pos_x, cur.pos_y, 0), Quaternion.identity);
+                    break;
+                case ITEM_NAME.AX_01:
+                    item_object_dict[cur] = Instantiate(ax_01_prefab, new Vector3(cur.pos_x, cur.pos_y, 0), Quaternion.identity);
+                    break;
+                case ITEM_NAME.ARMOR_01:
+                    item_object_dict[cur] = Instantiate(armor_01_prefab, new Vector3(cur.pos_x, cur.pos_y, 0), Quaternion.identity);
+                    break;
+                case ITEM_NAME.ARMOR_02:
+                    item_object_dict[cur] = Instantiate(armor_02_prefab, new Vector3(cur.pos_x, cur.pos_y, 0), Quaternion.identity);
+                    break;
+                case ITEM_NAME.ARTIFACT_01:
+                    item_object_dict[cur] = Instantiate(artifact_01_prefab, new Vector3(cur.pos_x, cur.pos_y, 0), Quaternion.identity);
+                    break;
+            }
+        }
+
         //create shadows
         for (int i = 0; i < this.terrain_object_arr.GetLength(0); i++)
         {
@@ -878,11 +959,19 @@ public class GameSystemManager : MonoBehaviour
             }
         }
     }
-
     IEnumerator ResetAnimation()
     {
         yield return new WaitForSeconds(0.15f);
         Debug.Log("RESETANIMATION");
         this.player_object.GetComponent<Animator>().SetInteger("player_state", 0);
+    }
+
+    public ItemInfo FindItemAt(int x, int y)
+    {
+        foreach(ItemInfo item in this.item_list)
+        {
+            if (item.pos_x == x && item.pos_y == y) return item;
+        }
+        return null;
     }
 }
