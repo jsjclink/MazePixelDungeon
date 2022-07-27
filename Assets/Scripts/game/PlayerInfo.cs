@@ -12,6 +12,7 @@ public class PlayerInfo: UnitInfo{
     public int attack_pt = 5;
     public int pos_x;
     public int pos_y;
+    public int hunger = 500;
 
     public List<(int, int)> cur_path;
 
@@ -137,8 +138,10 @@ public class PlayerInfo: UnitInfo{
     public bool PlayerSight(int target_x, int target_y, TerrainInfo[,] map)
     {
         int height = map.GetLength(0); int width = map.GetLength(1);
-        int[] dx = { 0, 1, 1, 1, 0, -1, -1, -1 };
-        int[] dy = { 1, 1, 0, -1, -1, -1, 0, 1 };
+        //int[] dx = { 0, 1, 1, 1, 0, -1, -1, -1 };
+        //int[] dy = { 1, 1, 0, -1, -1, -1, 0, 1 };
+        int[] dx = { 0, 1, 0, -1, 1, 1, -1, -1};
+        int[] dy = { 1, 0, -1, 0, 1, -1, -1, 1};
 
         bool[,] visited = new bool[height, width];
         visited[this.pos_y, this.pos_x] = true;

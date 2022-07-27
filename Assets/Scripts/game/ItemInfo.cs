@@ -4,7 +4,7 @@ using UnityEngine;
 
 public enum ITEM_TYPE
 {
-    WEAPON, ARMOR, ARTIFACT
+    WEAPON, ARMOR, ARTIFACT, FOOD
 }
 public enum SPECIFIC_ITEM_TYPE
 {
@@ -12,7 +12,7 @@ public enum SPECIFIC_ITEM_TYPE
 }
 public enum ITEM_NAME
 {
-    NONE, SWORD_01, AX_01, ARTIFACT_01, ARMOR_01, ARMOR_02
+    NONE, SWORD_01, AX_01, ARTIFACT_01, ARMOR_01, ARMOR_02, FOOD_01
 }
 
 

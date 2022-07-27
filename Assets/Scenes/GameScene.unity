@@ -3538,6 +3538,7 @@ MonoBehaviour:
     attack_pt: 5
     pos_x: 0
     pos_y: 0
+    hunger: 500
     engaging_unit:
       unit_type: 0
       unit_state: 0
@@ -3548,6 +3549,7 @@ MonoBehaviour:
       pos_y: 0
       hp: 0
       attack_pt: 0
+      animation_state: 0
     animation_state: 0
 --- !u!114 &1602366393
 MonoBehaviour:

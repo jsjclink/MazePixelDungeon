@@ -186,7 +186,7 @@ public class GameSystemManager : MonoBehaviour
         prev_action_time = Time.time;
         turn_passed = false;
 
-        Application.targetFrameRate = 20; // 배터리 최적화
+        Application.targetFrameRate = 30; // 배터리 최적화
 
         //앞에 씬에서 받아옴
         //game_idx = 1;
@@ -258,7 +258,7 @@ public class GameSystemManager : MonoBehaviour
         if(turn_queue.Count > 0)
         {
             float action_interval = Time.time - prev_action_time;
-            if (action_interval > 0.2f)
+            if (action_interval > 0.15f)
             {
                 List<EnemyInfo> turn_used_enemy_list = new List<EnemyInfo>();
                 //ENGAGE
@@ -331,6 +331,7 @@ public class GameSystemManager : MonoBehaviour
                         SaveData();
                         break;
                     case TURN_TYPE.ENEMY_TURN:
+                        ((EnemyInfo)turn_info.unit).animation_state = ANIMATION_STATE.ENGAGING;
                         this.player_info.hp -= 5;
                         break;
                 }
@@ -383,36 +384,70 @@ public class GameSystemManager : MonoBehaviour
                 }
                 prev_action_time = Time.time;
                 turn_passed = true;
+                this.player_info.hunger--;
+                if (this.player_info.hunger < 0) this.player_info.hp--;
+                Debug.Log("Player_info : " + this.player_info.hunger);
             }
         }
 
         if (turn_passed)
         {
             Debug.Log("turn_passed");
-            //animation set
+            //animation set-player
             switch (this.player_info.animation_state)
             {
                 case ANIMATION_STATE.IDLE:
-                    this.player_object.GetComponent<Animator>().SetInteger("player_state", 0);
-                    break;
+                    {
+                        this.player_object.GetComponent<Animator>().SetInteger("unit_state", 0);
+                        break;
+                    }   
                 case ANIMATION_STATE.MOVING:
-                    int dx1 = this.player_info.pos_x - (int)this.player_object.transform.position.x;
-                    if (dx1 > 0) this.player_object.GetComponent<SpriteRenderer>().flipX = false;
-                    else this.player_object.GetComponent<SpriteRenderer>().flipX = true;
-                    this.player_object.GetComponent<Animator>().SetInteger("player_state", 1);
-                    StartCoroutine(ResetAnimation());
-                    break;
+                    {
+                        int dx = this.player_info.pos_x - (int)this.player_object.transform.position.x;
+                        if (dx > 0) this.player_object.GetComponent<SpriteRenderer>().flipX = false;
+                        else this.player_object.GetComponent<SpriteRenderer>().flipX = true;
+                        this.player_object.GetComponent<Animator>().SetInteger("unit_state", 1);
+                        StartCoroutine(ResetAnimation(this.player_object.GetComponent<Animator>()));
+                        break;
+                    }                
                 case ANIMATION_STATE.ENGAGING:
-                    int dx2 = this.player_info.engaging_unit.pos_x - this.player_info.pos_x;
-                    if (dx2 > 0) this.player_object.GetComponent<SpriteRenderer>().flipX = false;
-                    else this.player_object.GetComponent<SpriteRenderer>().flipX = true;
-                    this.player_object.GetComponent<Animator>().SetInteger("player_state", 2);
-                    StartCoroutine(ResetAnimation());
-                    break;
+                    {
+                        int dx = this.player_info.engaging_unit.pos_x - this.player_info.pos_x;
+                        if (dx > 0) this.player_object.GetComponent<SpriteRenderer>().flipX = false;
+                        else this.player_object.GetComponent<SpriteRenderer>().flipX = true;
+                        this.player_object.GetComponent<Animator>().SetInteger("unit_state", 2);
+                        StartCoroutine(ResetAnimation(this.player_object.GetComponent<Animator>()));
+                        break;
+                    }       
                 case ANIMATION_STATE.SLEEPING:
                     break;
             }
             this.player_info.animation_state = ANIMATION_STATE.IDLE;
+            //animation set-player
+            foreach(EnemyInfo enemy in this.enemy_list)
+            {
+                switch (enemy.animation_state)
+                {
+                    case ANIMATION_STATE.IDLE:
+                        {
+                            int dx = enemy.pos_x - (int)enemy_object_dict[enemy].transform.position.x;
+                            if (dx > 0) enemy_object_dict[enemy].GetComponent<SpriteRenderer>().flipX = false;
+                            else enemy_object_dict[enemy].GetComponent<SpriteRenderer>().flipX = true;
+                            //enemy_object_dict[enemy].GetComponent<Animator>().SetInteger("unit_state", 0);
+                            break;
+                        }
+                    case ANIMATION_STATE.ENGAGING:
+                        {
+                            int dx = this.player_info.pos_x - enemy.pos_x;
+                            if (dx > 0) enemy_object_dict[enemy].GetComponent<SpriteRenderer>().flipX = false;
+                            else enemy_object_dict[enemy].GetComponent<SpriteRenderer>().flipX = true;
+                            enemy_object_dict[enemy].GetComponent<Animator>().SetInteger("unit_state", 2);
+                            StartCoroutine(ResetAnimation(enemy_object_dict[enemy].GetComponent<Animator>()));
+                            break;
+                        }  
+                }
+            }
+
 
             //draw
             if (player_object.transform.position.x != this.player_info.pos_x || player_object.transform.position.y != this.player_info.pos_y)
@@ -959,11 +994,11 @@ public class GameSystemManager : MonoBehaviour
             }
         }
     }
-    IEnumerator ResetAnimation()
+    IEnumerator ResetAnimation(Animator animator)
     {
         yield return new WaitForSeconds(0.15f);
         Debug.Log("RESETANIMATION");
-        this.player_object.GetComponent<Animator>().SetInteger("player_state", 0);
+        animator.SetInteger("unit_state", 0);
     }
 
     public ItemInfo FindItemAt(int x, int y)

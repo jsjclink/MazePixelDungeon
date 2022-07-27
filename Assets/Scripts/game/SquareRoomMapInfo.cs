@@ -241,7 +241,7 @@ public class SquareRoomMapInfo : MapInfo
             int spawn_y = UnityEngine.Random.Range(space_list[idx].start_y + 1, space_list[idx].end_y - 1);
             //¼ö ¹Ù²î¸é ¹Ù²ãÁà¾ßÇÔ
             UNIT_TYPE[] unit_type_pool = { UNIT_TYPE.ENEMY_RAT, UNIT_TYPE.ENEMY_GNOLL, UNIT_TYPE.ENEMY_CRAB };
-            UNIT_TYPE unit_type = unit_type_pool[UnityEngine.Random.Range(0, unit_type_pool.Length - 1)];
+            UNIT_TYPE unit_type = unit_type_pool[UnityEngine.Random.Range(0, unit_type_pool.Length)];
             enemy_list.Add(new EnemyInfo(unit_type, spawn_x, spawn_y, this.hierarchy_idx, this.layer_idx, this.map_idx));
         }
         return enemy_list;
@@ -257,7 +257,7 @@ public class SquareRoomMapInfo : MapInfo
             int spawn_y = UnityEngine.Random.Range(space_list[idx].start_y + 1, space_list[idx].end_y - 1);
             //¼ö ¹Ù²î¸é ¹Ù²ãÁà¾ßÇÔ
             ITEM_TYPE[] item_type_pool = { ITEM_TYPE.WEAPON, ITEM_TYPE.ARMOR, ITEM_TYPE.ARTIFACT };
-            ITEM_TYPE item_type = item_type_pool[UnityEngine.Random.Range(0, item_type_pool.Length - 1)];
+            ITEM_TYPE item_type = item_type_pool[UnityEngine.Random.Range(0, item_type_pool.Length)];
 
             ITEM_NAME[] item_name_pool;
             ITEM_NAME item_name = ITEM_NAME.NONE;
@@ -265,20 +265,30 @@ public class SquareRoomMapInfo : MapInfo
             {
                 case ITEM_TYPE.WEAPON:
                     item_name_pool = new ITEM_NAME[] { ITEM_NAME.SWORD_01, ITEM_NAME.AX_01 };
-                    item_name = item_name_pool[UnityEngine.Random.Range(0, item_name_pool.Length - 1)];
+                    item_name = item_name_pool[UnityEngine.Random.Range(0, item_name_pool.Length)];
                     break;
                 case ITEM_TYPE.ARMOR:
                     item_name_pool = new ITEM_NAME[] { ITEM_NAME.ARMOR_01, ITEM_NAME.ARMOR_02 };
-                    item_name = item_name_pool[UnityEngine.Random.Range(0, item_name_pool.Length - 1)];
+                    item_name = item_name_pool[UnityEngine.Random.Range(0, item_name_pool.Length)];
                     break;
                 case ITEM_TYPE.ARTIFACT:
                     item_name_pool = new ITEM_NAME[] { ITEM_NAME.ARTIFACT_01 };
-                    item_name = item_name_pool[UnityEngine.Random.Range(0, item_name_pool.Length - 1)];
+                    item_name = item_name_pool[UnityEngine.Random.Range(0, item_name_pool.Length)];
                     break;
             }
 
             item_list.Add(new ItemInfo(spawn_x, spawn_y, item_type, SPECIFIC_ITEM_TYPE.NONE, item_name, UnityEngine.Random.Range(0, 3)));
         }
+        /*
+        for(int i = 0; i < 3; i++)
+        {
+            int idx = UnityEngine.Random.Range(0, space_list.Count);
+            int spawn_x = UnityEngine.Random.Range(space_list[idx].start_x + 1, space_list[idx].end_x - 1);
+            int spawn_y = UnityEngine.Random.Range(space_list[idx].start_y + 1, space_list[idx].end_y - 1);
+            ITEM_TYPE item_type = ITEM_TYPE.FOOD;
+            ITEM_NAME item_name = ITEM_NAME.FOOD_01;
+            item_list.Add(new ItemInfo(spawn_x, spawn_y, item_type, SPECIFIC_ITEM_TYPE.NONE, item_name, 0));
+        }*/
         return item_list;
     }
 

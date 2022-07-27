@@ -14,6 +14,8 @@ public class EnemyInfo: UnitInfo{
     public int hp = 10;
     public int attack_pt = 5;
 
+    public ANIMATION_STATE animation_state;
+
     public List<(int, int)> cur_path;
 
     public EnemyInfo(UNIT_TYPE unit_type, int x, int y, int hierarchy_idx, int layer_idx, int map_idx)
@@ -25,6 +27,7 @@ public class EnemyInfo: UnitInfo{
         this.pos_x = x;
         this.pos_y = y;
         this.unit_state = UNIT_STATE.IDLE;
+        this.animation_state = ANIMATION_STATE.IDLE;
         cur_path = new List<(int, int)>();
     }
     public void SetPos(int x, int y)
