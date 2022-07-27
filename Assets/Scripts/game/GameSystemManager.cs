@@ -29,6 +29,15 @@ public class SaveData
         }
     }
     [Serializable]
+    public class ItemSerializedList
+    {
+        public List<ItemInfo> item_serialized_list;
+        public ItemSerializedList()
+        {
+            item_serialized_list = new List<ItemInfo>();
+        }
+    }
+    [Serializable]
     public class SeedInfo
     {
         public int seed;
@@ -40,11 +49,13 @@ public class SaveData
 
     public PlayerInfo player_info;
     public EnemySerializedList enemySerialized;
+    public ItemSerializedList itemSerialized;
     public SeedInfo seedInfo;
 
     public SaveData(Dungeon dungeon, int seed, PlayerInfo player_info)
     {
         this.enemySerialized = new EnemySerializedList();
+        this.itemSerialized = new ItemSerializedList();
         this.seedInfo = new SeedInfo(seed);
         this.player_info = player_info;
 
@@ -57,6 +68,10 @@ public class SaveData
                     foreach(EnemyInfo enemy in map_info.enemy_list)
                     {
                         this.enemySerialized.enemy_serialized_list.Add(enemy);
+                    }
+                    foreach(ItemInfo item in map_info.item_list)
+                    {
+                        this.itemSerialized.item_serialized_list.Add(item);
                     }
                 }
             }
@@ -170,8 +185,8 @@ public class GameSystemManager : MonoBehaviour
     GameObject[,] shadow_object_arr;
     List<EnemyInfo> enemy_list;
     Dictionary<EnemyInfo, GameObject> enemy_object_dict;
-    List<ItemInfo> item_list;
-    Dictionary<ItemInfo, GameObject> item_object_dict;
+    public List<ItemInfo> item_list;
+    public Dictionary<ItemInfo, GameObject> item_object_dict;
 
     Queue<TurnInfo> turn_queue;
 
@@ -700,8 +715,11 @@ public class GameSystemManager : MonoBehaviour
                         {
                             ItemInfo item = FindItemAt((int)touch_pos.x, (int)touch_pos.y);
                             this.player_info.item_list.Add(item);
+                            GameObject.Find("Canvas").transform.Find("InvenPopUp").transform.Find("Inventory").GetComponent<Inventory>().items.Add(item);
+                            GameObject.Find("Canvas").transform.Find("InvenPopUp").transform.Find("Inventory").GetComponent<Inventory>().FreeSlot();
                             Destroy(item_object_dict[item]);
-                            item_list.Remove(item);
+                            this.item_list.Remove(item);
+                            this.cur_map_info.item_list = this.item_list;
                             Debug.Log("ITEM : " + this.player_info.item_list.Count);
                         }
                         else if (terrain_info_arr[(int)touch_pos.y, (int)touch_pos.x].terrain_type == TERRAIN_TYPE.STAIR)   //그 위치가 계단과 같을 때
@@ -757,6 +775,7 @@ public class GameSystemManager : MonoBehaviour
             string load_data = File.ReadAllText(Path.Combine(Application.persistentDataPath, "dungeondata_" + game_idx + ".Json"));
             SaveData data = JsonUtility.FromJson<SaveData>(load_data);
             SaveData.EnemySerializedList enemySerialized = data.enemySerialized;
+            SaveData.ItemSerializedList itemSerialized = data.itemSerialized;
             SaveData.SeedInfo seedInfo = data.seedInfo;
             this.seed = seedInfo.seed;
             UnityEngine.Random.InitState(seedInfo.seed);
@@ -774,12 +793,17 @@ public class GameSystemManager : MonoBehaviour
                     foreach (MapInfo map_info in map_linfo_list)
                     {
                         map_info.enemy_list = new List<EnemyInfo>();
+                        map_info.item_list = new List<ItemInfo>();
                     }
                 }
             }
             foreach (EnemyInfo enemy in enemySerialized.enemy_serialized_list)
             {
                 load_dungeon.hierarchy_list[enemy.hierarchy_idx].mapInfos_of_layer[enemy.layer_idx][enemy.map_idx].enemy_list.Add(new EnemyInfo(enemy.unit_type, enemy.pos_x, enemy.pos_y, enemy.hierarchy_idx, enemy.layer_idx, enemy.map_idx));
+            }
+            foreach(ItemInfo item in itemSerialized.item_serialized_list)
+            {
+                load_dungeon.hierarchy_list[item.hierarchy_idx].mapInfos_of_layer[item.layer_idx][item.map_idx].item_list.Add(new ItemInfo(item.pos_x, item.pos_y, item.item_type, item.specific_item_type, item.item_name, item.enchant_cnt, item.hierarchy_idx, item.layer_idx, item.map_idx));
             }
             this.player_info = new PlayerInfo(data.player_info.hierarchy_idx, data.player_info.layer_idx, data.player_info.map_idx, data.player_info.hp, data.player_info.attack_pt, data.player_info.pos_x, data.player_info.pos_y, data.player_info.item_list);
             this.dungeon = load_dungeon;
@@ -862,6 +886,13 @@ public class GameSystemManager : MonoBehaviour
                     }
                 }
             }
+        }
+
+        //inven init
+        foreach(ItemInfo item in this.player_info.item_list)
+        {
+            GameObject.Find("Canvas").transform.Find("InvenPopUp").transform.Find("Inventory").GetComponent<Inventory>().items.Add(item);
+            GameObject.Find("Canvas").transform.Find("InvenPopUp").transform.Find("Inventory").GetComponent<Inventory>().FreeSlot();
         }
 
         //create terrain objects
@@ -1013,5 +1044,31 @@ public class GameSystemManager : MonoBehaviour
             if (item.pos_x == x && item.pos_y == y) return item;
         }
         return null;
+    }
+
+    public void DropItem(ItemInfo item)
+    {
+        this.player_info.item_list.Remove(item);
+        ItemInfo new_item = new ItemInfo(this.player_info.pos_x, this.player_info.pos_y, item.item_type, item.specific_item_type, item.item_name, item.enchant_cnt, this.player_info.hierarchy_idx, this.player_info.layer_idx, this.player_info.map_idx);
+        
+        this.item_list.Add(new_item);
+        switch (new_item.item_name)
+        {
+            case ITEM_NAME.SWORD_01:
+                this.item_object_dict[new_item] = Instantiate(sword_01_prefab, new Vector3(new_item.pos_x, new_item.pos_y, 0), Quaternion.identity);
+                break;
+            case ITEM_NAME.AX_01:
+                this.item_object_dict[new_item] = Instantiate(ax_01_prefab, new Vector3(new_item.pos_x, new_item.pos_y, 0), Quaternion.identity);
+                break;
+            case ITEM_NAME.ARMOR_01:
+                this.item_object_dict[new_item] = Instantiate(armor_01_prefab, new Vector3(new_item.pos_x, new_item.pos_y, 0), Quaternion.identity);
+                break;
+            case ITEM_NAME.ARMOR_02:
+                this.item_object_dict[new_item] = Instantiate(armor_02_prefab, new Vector3(new_item.pos_x, new_item.pos_y, 0), Quaternion.identity);
+                break;
+            case ITEM_NAME.ARTIFACT_01:
+                this.item_object_dict[new_item] = Instantiate(artifact_01_prefab, new Vector3(new_item.pos_x, new_item.pos_y, 0), Quaternion.identity);
+                break;
+        }
     }
 }

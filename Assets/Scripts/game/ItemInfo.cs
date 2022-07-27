@@ -19,6 +19,10 @@ public enum ITEM_NAME
 [Serializable]
 public class ItemInfo
 {
+    public int hierarchy_idx;
+    public int layer_idx;
+    public int map_idx;
+
     public int pos_x;
     public int pos_y;
     public ITEM_TYPE item_type;
@@ -27,8 +31,12 @@ public class ItemInfo
     public Sprite item_image;
     public int enchant_cnt;
 
-    public ItemInfo(int pos_x, int pos_y, ITEM_TYPE item_type, SPECIFIC_ITEM_TYPE specific_item_type, ITEM_NAME item_name, int enchant_cnt)
+    public ItemInfo(int pos_x, int pos_y, ITEM_TYPE item_type, SPECIFIC_ITEM_TYPE specific_item_type, ITEM_NAME item_name, int enchant_cnt, int hierarchy_idx, int layer_idx, int map_idx)
     {
+        this.hierarchy_idx = hierarchy_idx;
+        this.layer_idx = layer_idx;
+        this.map_idx = map_idx;
+
         this.pos_x = pos_x;
         this.pos_y = pos_y;
         this.item_type = item_type;

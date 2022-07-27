@@ -16,20 +16,13 @@ public class Inventory : MonoBehaviour
 
     private void Awake()
     {
+
         for (int i = 0; i < 20; i++)
             SlotSpawn(slot_prefab, i + 1);
 
         slots = slot_parent.GetComponentsInChildren<Slot>();
 
         FreeSlot();
-        AddItem(new ItemInfo(0, 0, ITEM_TYPE.WEAPON, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.SWORD_01, 0));
-        AddItem(new ItemInfo(0, 0, ITEM_TYPE.WEAPON, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.AX_01, 0));
-        AddItem(new ItemInfo(0, 0, ITEM_TYPE.ARMOR, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.ARMOR_01, 0));
-        AddItem(new ItemInfo(0, 0, ITEM_TYPE.ARMOR, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.ARMOR_02, 0));
-        AddItem(new ItemInfo(0, 0, ITEM_TYPE.ARTIFACT, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.ARTIFACT_01, 0));
-        AddItem(new ItemInfo(0, 0, ITEM_TYPE.ARTIFACT, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.ARTIFACT_02, 0));
-        AddItem(new ItemInfo(0, 0, ITEM_TYPE.ARTIFACT, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.ARTIFACT_03, 0));
-        AddItem(new ItemInfo(0, 0, ITEM_TYPE.FOOD, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.FOOD_01, 0));
     }
 
     public void FreeSlot()

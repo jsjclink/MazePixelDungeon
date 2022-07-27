@@ -277,7 +277,7 @@ public class SquareRoomMapInfo : MapInfo
                     break;
             }
 
-            item_list.Add(new ItemInfo(spawn_x, spawn_y, item_type, SPECIFIC_ITEM_TYPE.NONE, item_name, UnityEngine.Random.Range(0, 3)));
+            item_list.Add(new ItemInfo(spawn_x, spawn_y, item_type, SPECIFIC_ITEM_TYPE.NONE, item_name, UnityEngine.Random.Range(0, 3), this.hierarchy_idx, this.layer_idx, this.map_idx));
         }
         /*
         for(int i = 0; i < 3; i++)
