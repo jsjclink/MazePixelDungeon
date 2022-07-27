@@ -29,6 +29,7 @@ public class Inventory : MonoBehaviour
         AddItem(new ItemInfo(0, 0, ITEM_TYPE.ARTIFACT, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.ARTIFACT_01, 0));
         AddItem(new ItemInfo(0, 0, ITEM_TYPE.ARTIFACT, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.ARTIFACT_02, 0));
         AddItem(new ItemInfo(0, 0, ITEM_TYPE.ARTIFACT, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.ARTIFACT_03, 0));
+        AddItem(new ItemInfo(0, 0, ITEM_TYPE.FOOD, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.FOOD_01, 0));
     }
 
     public void FreeSlot()

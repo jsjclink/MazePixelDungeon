@@ -88,6 +88,13 @@ public class EquipOrUse : MonoBehaviour, IPointerClickHandler
             inven.FreeSlot();
             Destroy(this.transform.parent.parent.gameObject);
         }
+        else
+        {
+            int idx = int.Parse(transform.parent.parent.name.Split("_")[1]);
+            inven.items.RemoveAt(idx);
+            inven.FreeSlot();
+            Destroy(transform.parent.parent.gameObject);
+        }
 
     }
 }
