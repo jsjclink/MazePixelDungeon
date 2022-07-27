@@ -174,7 +174,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3623c9f88c859f4dada7672dc701079, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  items: []
   slot_parent: {fileID: 1131603265}
   slots: []
   slot_prefab: {fileID: 1811667476123214410, guid: 5e34e8dc428f5ee43a76274b4cdc1827, type: 3}

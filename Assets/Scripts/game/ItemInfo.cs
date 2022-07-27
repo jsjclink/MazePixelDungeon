@@ -40,22 +40,22 @@ public class ItemInfo
             case ITEM_NAME.NONE:
                 break;
             case ITEM_NAME.SWORD_01:
-                this.item_image = sprites[68];
+                this.item_image = sprites[66];
                 break;
             case ITEM_NAME.AX_01:
-                this.item_image = sprites[69];
+                this.item_image = sprites[67];
                 break;
             case ITEM_NAME.ARTIFACT_01:
-                this.item_image = sprites[177];
+                this.item_image = sprites[164];
                 break;
             case ITEM_NAME.ARMOR_01:
-                this.item_image = sprites[127];
+                this.item_image = sprites[118];
                 break;
             case ITEM_NAME.ARMOR_02:
-                this.item_image = sprites[128];
+                this.item_image = sprites[119];
                 break;
             case ITEM_NAME.FOOD_01:
-                this.item_image = sprites[16];
+                this.item_image = sprites[275];
                 break;
         }
     }
