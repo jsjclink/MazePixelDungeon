@@ -64,10 +64,8 @@ public class LoadDatas : MonoBehaviour
 
     public void SlotSpawn(GameObject prefab, string name)
     {
-
-        GameObject slot = Instantiate(load_slot_prefab, new Vector3(), Quaternion.identity, GameObject.Find("Content").transform);
         load_slot_prefab.GetComponentInChildren<TMP_Text>().text = name;
-
+        GameObject slot = Instantiate(load_slot_prefab, new Vector3(), Quaternion.identity, GameObject.Find("Content").transform);
     }
 
 }

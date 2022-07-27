@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public enum ITEM_TYPE
 {
@@ -15,7 +16,7 @@ public enum ITEM_NAME
     NONE, SWORD_01, AX_01, ARTIFACT_01, ARTIFACT_02, ARTIFACT_03, ARMOR_01, ARMOR_02, FOOD_01
 }
 
-
+[Serializable]
 public class ItemInfo
 {
     public int pos_x;

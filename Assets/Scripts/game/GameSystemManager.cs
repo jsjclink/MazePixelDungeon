@@ -797,6 +797,8 @@ public class GameSystemManager : MonoBehaviour
             this.shadow_object_arr = new GameObject[this.terrain_info_arr.GetLength(0), this.terrain_info_arr.GetLength(1)];
             this.enemy_object_dict = new Dictionary<EnemyInfo, GameObject>();
             this.item_object_dict = new Dictionary<ItemInfo, GameObject>();
+
+            Debug.Log("item_list : " + this.item_list.Count);
         }
         else
         {
@@ -897,7 +899,6 @@ public class GameSystemManager : MonoBehaviour
         //create enemy objects
         foreach (EnemyInfo cur in this.enemy_list)
         {
-            Debug.Log(cur.unit_type);
             switch (cur.unit_type) {   
                 case UNIT_TYPE.ENEMY_RAT:
                     enemy_object_dict[cur] = Instantiate(enemy_rat_prefab, new Vector3(cur.pos_x, cur.pos_y, 0), Quaternion.identity);
@@ -914,6 +915,7 @@ public class GameSystemManager : MonoBehaviour
         //create items
         foreach (ItemInfo cur in this.item_list)
         {
+            Debug.Log(cur.item_name);
             switch (cur.item_name)
             {
                 case ITEM_NAME.SWORD_01:
@@ -930,6 +932,9 @@ public class GameSystemManager : MonoBehaviour
                     break;
                 case ITEM_NAME.ARTIFACT_01:
                     item_object_dict[cur] = Instantiate(artifact_01_prefab, new Vector3(cur.pos_x, cur.pos_y, 0), Quaternion.identity);
+                    break;
+                default:
+                    Debug.Log("ERRROROROROROOROR");
                     break;
             }
         }
