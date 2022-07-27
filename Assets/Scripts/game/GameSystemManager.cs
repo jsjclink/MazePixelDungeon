@@ -145,7 +145,7 @@ public class GameSystemManager : MonoBehaviour
     float prev_action_time;
 
     Dungeon dungeon;
-    PlayerInfo player_info;
+    public PlayerInfo player_info;
 
     MapInfo cur_map_info;
     TerrainInfo[,] terrain_info_arr;
@@ -199,6 +199,9 @@ public class GameSystemManager : MonoBehaviour
 
     private void Update()
     {
+
+        Debug.Log(player_info.layer_idx);
+
         //get input
         TouchInfo touch_info = GetTouch();
 

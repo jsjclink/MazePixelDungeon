@@ -25,6 +25,7 @@ public class PlayerInfo: UnitInfo{
         this.cur_path = new List<(int, int)>();
         this.unit_state = UNIT_STATE.IDLE;
         this.animation_state = ANIMATION_STATE.IDLE;
+        this.layer_idx = 1;
     }
     public PlayerInfo(int hierarchy_idx, int layer_idx, int map_idx, int hp, int attack_pt, int pos_x, int pos_y)
     {
