@@ -33,9 +33,10 @@ public class PlayerInfoPopUp : MonoBehaviour, IPointerClickHandler
         player_info.name = "PlayerInfoPopUp";
 
         player_info.GetComponentsInChildren<Image>()[2].sprite = image.sprite;
-        player_info.GetComponentsInChildren<TMP_Text>()[0].text = "HP : " + gameSystemManager.player_info.hp.ToString();
-        player_info.GetComponentsInChildren<TMP_Text>()[1].text = "Attack_pt : " + gameSystemManager.player_info.attack_pt.ToString();
-        player_info.GetComponentsInChildren<TMP_Text>()[2].text = "Pos : " + gameSystemManager.player_info.layer_idx + "-" + gameSystemManager.player_info.map_idx;
+        player_info.GetComponentsInChildren<TMP_Text>()[0].text = "HP : " + gameSystemManager.player_info.cur_hp + "/" + gameSystemManager.player_info.max_hp;
+        player_info.GetComponentsInChildren<TMP_Text>()[1].text = "Attack_pt : " + gameSystemManager.player_info.attack_pt;
+        player_info.GetComponentsInChildren<TMP_Text>()[2].text = "Hunger : " + gameSystemManager.player_info.hunger;
+        player_info.GetComponentsInChildren<TMP_Text>()[3].text = "Pos : " + gameSystemManager.player_info.layer_idx + "-" + gameSystemManager.player_info.map_idx;
     }
 
     

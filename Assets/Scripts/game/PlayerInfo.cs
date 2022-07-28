@@ -8,7 +8,8 @@ public class PlayerInfo: UnitInfo{
     public int hierarchy_idx;
     public int layer_idx;
     public int map_idx;
-    public int hp = 100;
+    public int max_hp;
+    public int cur_hp;
     public int attack_pt = 5;
     public int pos_x;
     public int pos_y;
@@ -29,13 +30,15 @@ public class PlayerInfo: UnitInfo{
         this.hierarchy_idx = 0;
         this.layer_idx = 1;
         this.map_idx = 0;
+        this.max_hp = 100;
+        this.cur_hp = 100;
         this.unit_type = UNIT_TYPE.PLAYER;
         this.cur_path = new List<(int, int)>();
         this.unit_state = UNIT_STATE.IDLE;
         this.animation_state = ANIMATION_STATE.IDLE;
         this.item_list = new List<ItemInfo>();
     }
-    public PlayerInfo(int hierarchy_idx, int layer_idx, int map_idx, int hp, int attack_pt, int pos_x, int pos_y, List<ItemInfo> item_list)
+    public PlayerInfo(int hierarchy_idx, int layer_idx, int map_idx, int max_hp, int cur_hp, int attack_pt, int pos_x, int pos_y, List<ItemInfo> item_list)
     {
         this.unit_type = UNIT_TYPE.PLAYER;
         this.cur_path = new List<(int, int)>();
@@ -43,7 +46,8 @@ public class PlayerInfo: UnitInfo{
         this.hierarchy_idx = hierarchy_idx;
         this.layer_idx = layer_idx;
         this.map_idx = map_idx;
-        this.hp = hp;
+        this.max_hp = max_hp;
+        this.cur_hp = cur_hp;
         this.attack_pt = attack_pt;
         this.pos_x = pos_x;
         this.pos_y = pos_y;

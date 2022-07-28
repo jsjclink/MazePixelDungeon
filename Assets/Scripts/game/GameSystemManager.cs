@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using LitJson;
+using UnityEngine.UI;
 using System.IO;
 using System;
 
@@ -166,7 +166,8 @@ public class GameSystemManager : MonoBehaviour
     [SerializeField]
     GameObject ring_02_prefab;
 
-
+    [SerializeField]
+    public GameObject HP_bar;
     [SerializeField]
     GameObject player_object;
 
@@ -347,10 +348,11 @@ public class GameSystemManager : MonoBehaviour
                         break;
                     case TURN_TYPE.ENEMY_TURN:
                         ((EnemyInfo)turn_info.unit).animation_state = ANIMATION_STATE.ENGAGING;
-                        this.player_info.hp -= 5;
+                        this.player_info.cur_hp -= 5;
+                        this.HP_bar.GetComponent<Slider>().value -= 5;
                         break;
                 }
-                Debug.Log("playerInfo.hp" + this.player_info.hp);
+                Debug.Log("playerInfo.hp" + this.player_info.cur_hp);
                 //attack을 queue에 넣은 애들 말고는 움직여야함
                 if (true || turn_queue.Count == 0 || turn_queue.Peek().turn_type == TURN_TYPE.PLAYER_TURN)
                 {
@@ -400,7 +402,11 @@ public class GameSystemManager : MonoBehaviour
                 prev_action_time = Time.time;
                 turn_passed = true;
                 this.player_info.hunger--;
-                if (this.player_info.hunger < 0) this.player_info.hp--;
+                if (this.player_info.hunger < 0)
+                {
+                    this.player_info.cur_hp--;
+                    this.HP_bar.GetComponent<Slider>().value -= 1;
+                }
                 Debug.Log("Player_info : " + this.player_info.hunger);
             }
         }
@@ -805,7 +811,7 @@ public class GameSystemManager : MonoBehaviour
             {
                 load_dungeon.hierarchy_list[item.hierarchy_idx].mapInfos_of_layer[item.layer_idx][item.map_idx].item_list.Add(new ItemInfo(item.pos_x, item.pos_y, item.item_type, item.specific_item_type, item.item_name, item.enchant_cnt, item.hierarchy_idx, item.layer_idx, item.map_idx));
             }
-            this.player_info = new PlayerInfo(data.player_info.hierarchy_idx, data.player_info.layer_idx, data.player_info.map_idx, data.player_info.hp, data.player_info.attack_pt, data.player_info.pos_x, data.player_info.pos_y, data.player_info.item_list);
+            this.player_info = new PlayerInfo(data.player_info.hierarchy_idx, data.player_info.layer_idx, data.player_info.map_idx, data.player_info.max_hp, data.player_info.cur_hp, data.player_info.attack_pt, data.player_info.pos_x, data.player_info.pos_y, data.player_info.item_list);
             this.dungeon = load_dungeon;
             this.cur_map_info = this.dungeon.hierarchy_list[this.player_info.hierarchy_idx].mapInfos_of_layer[this.player_info.layer_idx][this.player_info.map_idx];
             this.terrain_info_arr = (TerrainInfo[,])this.cur_map_info.terrain_info_arr.Clone();
@@ -821,6 +827,8 @@ public class GameSystemManager : MonoBehaviour
             this.shadow_object_arr = new GameObject[this.terrain_info_arr.GetLength(0), this.terrain_info_arr.GetLength(1)];
             this.enemy_object_dict = new Dictionary<EnemyInfo, GameObject>();
             this.item_object_dict = new Dictionary<ItemInfo, GameObject>();
+            this.HP_bar.GetComponent<Slider>().maxValue = this.player_info.max_hp;
+            this.HP_bar.GetComponent<Slider>().value = this.player_info.cur_hp;
 
             Debug.Log("item_list : " + this.item_list.Count);
         }
@@ -836,6 +844,8 @@ public class GameSystemManager : MonoBehaviour
             this.terrain_info_arr = this.cur_map_info.terrain_info_arr;
             this.enemy_list = this.cur_map_info.enemy_list;
             this.item_list = this.cur_map_info.item_list;
+            this.HP_bar.GetComponent<Slider>().maxValue = this.player_info.max_hp;
+            this.HP_bar.GetComponent<Slider>().value = this.player_info.cur_hp;
 
             this.terrain_object_arr = new GameObject[this.terrain_info_arr.GetLength(0), this.terrain_info_arr.GetLength(1)];
             this.shadow_object_arr = new GameObject[this.terrain_info_arr.GetLength(0), this.terrain_info_arr.GetLength(1)];

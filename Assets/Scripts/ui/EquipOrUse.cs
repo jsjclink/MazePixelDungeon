@@ -1,13 +1,16 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class EquipOrUse : MonoBehaviour, IPointerClickHandler
 {
     public void OnPointerClick(PointerEventData eventData)
     {
         Inventory inven = GameObject.Find("Inventory").GetComponent<Inventory>();
-        
+        GameSystemManager game_system_manager = GameObject.Find("GameSystem").GetComponent<GameSystemManager>();
+
+
 
         if (GetComponentInChildren<TMP_Text>().text == "EQUIP")
         {
@@ -91,6 +94,13 @@ public class EquipOrUse : MonoBehaviour, IPointerClickHandler
         else
         {
             int idx = int.Parse(transform.parent.parent.name.Split("_")[1]);
+            switch (inven.items[idx].item_name)
+            {
+                case ITEM_NAME.FOOD_01:
+                    game_system_manager.player_info.cur_hp += 5;
+                    game_system_manager.HP_bar.GetComponent<Slider>().value += 5;
+                    break;
+            }
             inven.items.RemoveAt(idx);
             inven.FreeSlot();
             Destroy(transform.parent.parent.gameObject);
