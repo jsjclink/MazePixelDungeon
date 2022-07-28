@@ -5,6 +5,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.IO;
 using System;
+using TMPro;
 
 
 public enum TOUCH_INPUT_TYPE
@@ -170,6 +171,8 @@ public class GameSystemManager : MonoBehaviour
 
     [SerializeField]
     public GameObject HP_bar;
+    [SerializeField]
+    public TMP_Text Layer;
     [SerializeField]
     GameObject player_object;
 
@@ -693,6 +696,9 @@ public class GameSystemManager : MonoBehaviour
 
         //camera
         cam.transform.position = new Vector3(this.player_info.pos_x, this.player_info.pos_y, -10);
+
+        //ui update
+        Layer.text = this.player_info.layer_idx + "-" + this.player_info.map_idx;
     }
     private TouchInfo GetTouch()
     {
