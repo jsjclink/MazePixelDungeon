@@ -256,7 +256,7 @@ public class SquareRoomMapInfo : MapInfo
             int spawn_x = UnityEngine.Random.Range(space_list[idx].start_x + 1, space_list[idx].end_x - 1);
             int spawn_y = UnityEngine.Random.Range(space_list[idx].start_y + 1, space_list[idx].end_y - 1);
             //¼ö ¹Ù²î¸é ¹Ù²ãÁà¾ßÇÔ
-            ITEM_TYPE[] item_type_pool = { ITEM_TYPE.WEAPON, ITEM_TYPE.ARMOR, ITEM_TYPE.WEAPON, ITEM_TYPE.ARMOR, ITEM_TYPE.RING, ITEM_TYPE.ARTIFACT };
+            ITEM_TYPE[] item_type_pool = { ITEM_TYPE.WEAPON, ITEM_TYPE.ARMOR, ITEM_TYPE.SCROLL, ITEM_TYPE.WEAPON, ITEM_TYPE.ARMOR, ITEM_TYPE.SCROLL, ITEM_TYPE.RING, ITEM_TYPE.ARTIFACT };
             ITEM_TYPE item_type = item_type_pool[UnityEngine.Random.Range(0, item_type_pool.Length)];
 
             ITEM_NAME[] item_name_pool;
@@ -269,6 +269,10 @@ public class SquareRoomMapInfo : MapInfo
                     break;
                 case ITEM_TYPE.ARMOR:
                     item_name_pool = new ITEM_NAME[] { ITEM_NAME.ARMOR_01, ITEM_NAME.ARMOR_02 };
+                    item_name = item_name_pool[UnityEngine.Random.Range(0, item_name_pool.Length)];
+                    break;
+                case ITEM_TYPE.SCROLL:
+                    item_name_pool = new ITEM_NAME[] { ITEM_NAME.SCROLL_BOSS, ITEM_NAME.SCROLL_SHEEP };
                     item_name = item_name_pool[UnityEngine.Random.Range(0, item_name_pool.Length)];
                     break;
                 case ITEM_TYPE.RING:
