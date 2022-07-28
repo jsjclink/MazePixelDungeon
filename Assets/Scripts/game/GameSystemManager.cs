@@ -203,6 +203,7 @@ public class GameSystemManager : MonoBehaviour
     public Dictionary<EnemyInfo, GameObject> enemy_object_dict;
     public List<ItemInfo> item_list;
     public Dictionary<ItemInfo, GameObject> item_object_dict;
+    public List<(GameObject, int)> sheep_object_list;
 
     Queue<TurnInfo> turn_queue;
 
@@ -213,6 +214,9 @@ public class GameSystemManager : MonoBehaviour
 
     void Start()
     {
+        //이거는 나중에 바꿔주자
+        sheep_object_list = new List<(GameObject, int)>();
+
         turn_queue = new Queue<TurnInfo>();
         prev_action_time = Time.time;
         turn_passed = false;
@@ -437,6 +441,18 @@ public class GameSystemManager : MonoBehaviour
         if (turn_passed)
         {
             Debug.Log("turn_passed");
+            //sheep list
+            List<(GameObject, int)> tmp_list = new List<(GameObject, int)>();
+            foreach((GameObject, int) sheep_info in sheep_object_list)
+            {
+                if (sheep_info.Item2 < 0) Destroy(sheep_info.Item1);
+                else
+                {
+                    tmp_list.Add((sheep_info.Item1, sheep_info.Item2 - 1));
+                }                
+            }
+            sheep_object_list = tmp_list;
+
             //animation set-player
             switch (this.player_info.animation_state)
             {
@@ -740,7 +756,7 @@ public class GameSystemManager : MonoBehaviour
         cam.transform.position = new Vector3(this.player_info.pos_x, this.player_info.pos_y, -10);
 
         //ui update
-        Layer.text = this.player_info.layer_idx + "-" + this.player_info.map_idx;
+        Layer.text = (this.player_info.hierarchy_idx*5 + this.player_info.layer_idx) + "-" + this.player_info.map_idx;
     }
     private TouchInfo GetTouch()
     {
@@ -1126,12 +1142,7 @@ public class GameSystemManager : MonoBehaviour
 
     public void CreateAndDestroySheep(int pos_x, int pos_y)
     {
-        DestroySheep(Instantiate(sheep_prefab, new Vector3(pos_x, pos_y, 0), Quaternion.identity));
-    }
-    IEnumerator DestroySheep(GameObject game_object)
-    {
-        yield return new WaitForSeconds(1.0f);
-        Destroy(game_object);
+        sheep_object_list.Add((Instantiate(sheep_prefab, new Vector3(pos_x, pos_y, 0), Quaternion.identity), 3));
     }
 
     public ItemInfo FindItemAt(int x, int y)

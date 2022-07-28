@@ -3924,6 +3924,7 @@ MonoBehaviour:
   enemy_gnoll_prefab: {fileID: 3327368212741128572, guid: 9cd75f91bb1acac4fbde4bc90a997d1b, type: 3}
   enemy_crab_prefab: {fileID: 2215931942538672318, guid: bd9c9c4a065f4b3429c15c3fdbf680c1, type: 3}
   boss_01_prefab: {fileID: 694049047934605749, guid: 0830a5291f0ccba46a8c88883cf1abae, type: 3}
+  sheep_prefab: {fileID: 7700955765390144829, guid: f32acca1e79997e45af2a5f1c91ccec9, type: 3}
   sword_01_prefab: {fileID: 3027286189601820120, guid: 6293417a3b9cfa848b3fc6c3bbf4157d, type: 3}
   ax_01_prefab: {fileID: 8553815394546530623, guid: 689cf591c9c226f4c94e505314c85e3c, type: 3}
   armor_01_prefab: {fileID: 264106623345289833, guid: c8671f07ad5e0b34283b97168d6ecb8e, type: 3}
@@ -3965,6 +3966,7 @@ MonoBehaviour:
       animation_state: 0
     animation_state: 0
     item_list: []
+    equip_list: []
   enemy_list: []
   item_list: []
 --- !u!114 &1602366393
