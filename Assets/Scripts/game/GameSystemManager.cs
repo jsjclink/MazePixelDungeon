@@ -987,6 +987,13 @@ public class GameSystemManager : MonoBehaviour
             this.player_info.item_list.Add(new ItemInfo(0, 0, ITEM_TYPE.SCROLL, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.SCROLL_BOSS, 0, 0, 0, 0));
             this.player_info.item_list.Add(new ItemInfo(0, 0, ITEM_TYPE.SCROLL, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.SCROLL_SHEEP, 0, 0, 0, 0));
             this.player_info.item_list.Add(new ItemInfo(0, 0, ITEM_TYPE.SCROLL, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.SCROLL_SHEEP, 0, 0, 0, 0));
+            this.player_info.item_list.Add(new ItemInfo(0, 0, ITEM_TYPE.ARMOR, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.ARMOR_01, 0, 0, 0, 0));
+            this.player_info.item_list.Add(new ItemInfo(0, 0, ITEM_TYPE.ARMOR, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.ARMOR_02, 0, 0, 0, 0));
+            this.player_info.item_list.Add(new ItemInfo(0, 0, ITEM_TYPE.WEAPON, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.AX_01, 0, 0, 0, 0));
+            this.player_info.item_list.Add(new ItemInfo(0, 0, ITEM_TYPE.WEAPON, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.SWORD_01, 0, 0, 0, 0));
+            this.player_info.item_list.Add(new ItemInfo(0, 0, ITEM_TYPE.FOOD, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.FOOD_01, 0, 0, 0, 0));
+            this.player_info.item_list.Add(new ItemInfo(0, 0, ITEM_TYPE.FOOD, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.FOOD_01, 0, 0, 0, 0));
+            this.player_info.item_list.Add(new ItemInfo(0, 0, ITEM_TYPE.POTION, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.POTION_HP, 0, 0, 0, 0));
         }
         //set player position
         if (game_loaded)
