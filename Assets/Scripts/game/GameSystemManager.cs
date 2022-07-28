@@ -361,7 +361,7 @@ public class GameSystemManager : MonoBehaviour
                         ((EnemyInfo)turn_info.unit).animation_state = ANIMATION_STATE.ENGAGING;
                         this.player_info.cur_hp -= 5;
                         this.HP_bar.GetComponent<Slider>().value -= 5;
-                        if(this.player_info.cur_hp == 0)
+                        if(this.player_info.cur_hp <= 0)
                         {
                             GameObject.Find("Canvas").transform.Find("GameOverPopUp").gameObject.SetActive(true);
                         }
@@ -419,9 +419,9 @@ public class GameSystemManager : MonoBehaviour
                 this.player_info.hunger--;
                 if (this.player_info.hunger < 0)
                 {
-                    this.player_info.cur_hp--;
-                    this.HP_bar.GetComponent<Slider>().value -= 1;
-                    if (this.player_info.cur_hp == 0)
+                    this.player_info.cur_hp -= 2;
+                    this.HP_bar.GetComponent<Slider>().value -= 2;
+                    if (this.player_info.cur_hp <= 0)
                     {
                         GameObject.Find("Canvas").transform.Find("GameOverPopUp").gameObject.SetActive(true);
                     }
