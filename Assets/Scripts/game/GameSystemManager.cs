@@ -327,7 +327,23 @@ public class GameSystemManager : MonoBehaviour
                                 break;
                             case UNIT_STATE.ENGAGING:
                                 Debug.Log("ATTACKED ENEMY");
-                                this.player_info.engaging_unit.hp -= 5;
+                                int item_attack_pt = 0;
+                                foreach(ItemInfo item in player_info.equip_list)
+                                {
+                                    if (item.item_type == ITEM_TYPE.WEAPON)
+                                    {
+                                        switch (item.item_name)
+                                        {
+                                            case ITEM_NAME.SWORD_01:
+                                                item_attack_pt = 5;
+                                                break;
+                                            case ITEM_NAME.AX_01:
+                                                item_attack_pt = 7;
+                                                break;
+                                        }
+                                    }
+                                }
+                                this.player_info.engaging_unit.hp -= (this.player_info.attack_pt + item_attack_pt);
                                 if (this.player_info.engaging_unit.hp <= 0)
                                 {
                                     Destroy(enemy_object_dict[this.player_info.engaging_unit]);
@@ -367,8 +383,24 @@ public class GameSystemManager : MonoBehaviour
                         break;
                     case TURN_TYPE.ENEMY_TURN:
                         ((EnemyInfo)turn_info.unit).animation_state = ANIMATION_STATE.ENGAGING;
-                        this.player_info.cur_hp -= ((EnemyInfo)turn_info.unit).attack_pt;
-                        this.HP_bar.GetComponent<Slider>().value -= ((EnemyInfo)turn_info.unit).attack_pt;
+                        int armor = 0;
+                        foreach(ItemInfo item in this.player_info.equip_list)
+                        {
+                            if(item.item_type == ITEM_TYPE.ARMOR)
+                            {
+                                switch (item.item_name)
+                                {
+                                    case ITEM_NAME.ARMOR_01:
+                                        armor = 5;
+                                        break;
+                                    case ITEM_NAME.ARMOR_02:
+                                        armor = 10;
+                                        break;
+                                }
+                            }
+                        }
+                        this.player_info.cur_hp -= (int)(((EnemyInfo)turn_info.unit).attack_pt * ((20.0f - (float)armor)/20.0f));
+                        this.HP_bar.GetComponent<Slider>().value -= (int)(((EnemyInfo)turn_info.unit).attack_pt * ((20.0f - (float)armor) / 20.0f));
                         if(this.player_info.cur_hp <= 0)
                         {
                             GameObject.Find("Canvas").transform.Find("GameOverPopUp").gameObject.SetActive(true);
@@ -425,6 +457,12 @@ public class GameSystemManager : MonoBehaviour
                 prev_action_time = Time.time;
                 turn_passed = true;
                 this.player_info.hunger--;
+                int artifact_01_cnt = 0;
+                foreach (ItemInfo item in this.player_info.equip_list)
+                {
+                    if (item.item_name == ITEM_NAME.ARTIFACT_01) artifact_01_cnt++;
+                }
+                this.player_info.cur_hp += artifact_01_cnt;
                 if (this.player_info.hunger < 0)
                 {
                     this.player_info.cur_hp -= 2;

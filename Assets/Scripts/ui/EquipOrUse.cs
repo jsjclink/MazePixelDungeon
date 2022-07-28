@@ -137,6 +137,8 @@ public class EquipOrUse : MonoBehaviour, IPointerClickHandler
         }
         else if(GetComponentInChildren<TMP_Text>().text == "UNEQUIP")
         {
+            game_system_manager.player_info.equip_list.Remove(GameObject.Find(this.transform.parent.parent.name.Split('_')[0].ToString()).transform.GetChild(0).GetComponent<EquipSlot>().item);
+            game_system_manager.player_info.item_list.Add(GameObject.Find(this.transform.parent.parent.name.Split('_')[0].ToString()).transform.GetChild(0).GetComponent<EquipSlot>().item);
             inven.items.Add(GameObject.Find(this.transform.parent.parent.name.Split('_')[0].ToString()).transform.GetChild(0).GetComponent<EquipSlot>().item);
             GameObject.Find(this.transform.parent.parent.name.Split('_')[0].ToString()).transform.GetChild(0).GetComponent<EquipSlot>().item = null;
             inven.FreeSlot();

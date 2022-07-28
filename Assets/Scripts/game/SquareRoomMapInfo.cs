@@ -261,7 +261,7 @@ public class SquareRoomMapInfo : MapInfo
     private List<ItemInfo> CreateItems()
     {
         List<ItemInfo> item_list = new List<ItemInfo>();
-        for(int i = 0; i < 3; i++)
+        for(int i = 0; i < 5; i++)
         {
             int idx = UnityEngine.Random.Range(0, space_list.Count);
             int spawn_x = UnityEngine.Random.Range(space_list[idx].start_x + 1, space_list[idx].end_x - 1);
