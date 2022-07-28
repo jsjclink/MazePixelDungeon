@@ -165,6 +165,8 @@ public class GameSystemManager : MonoBehaviour
     GameObject ring_01_prefab;
     [SerializeField]
     GameObject ring_02_prefab;
+    [SerializeField]
+    GameObject food_01_prefab;
 
     [SerializeField]
     public GameObject HP_bar;
@@ -674,6 +676,9 @@ public class GameSystemManager : MonoBehaviour
                 case ITEM_NAME.ARTIFACT_01:
                     item_object_dict[cur] = Instantiate(artifact_01_prefab, new Vector3(cur.pos_x, cur.pos_y, 0), Quaternion.identity);
                     break;
+                case ITEM_NAME.FOOD_01:
+                    item_object_dict[cur] = Instantiate(food_01_prefab, new Vector3(cur.pos_x, cur.pos_y, 0), Quaternion.identity);
+                    break;
             }
         }
 
@@ -974,8 +979,8 @@ public class GameSystemManager : MonoBehaviour
                 case ITEM_NAME.ARTIFACT_01:
                     item_object_dict[cur] = Instantiate(artifact_01_prefab, new Vector3(cur.pos_x, cur.pos_y, 0), Quaternion.identity);
                     break;
-                default:
-                    Debug.Log("ERRROROROROROOROR");
+                case ITEM_NAME.FOOD_01:
+                    item_object_dict[cur] = Instantiate(food_01_prefab, new Vector3(cur.pos_x, cur.pos_y, 0), Quaternion.identity);
                     break;
             }
         }
@@ -1078,6 +1083,9 @@ public class GameSystemManager : MonoBehaviour
                 break;
             case ITEM_NAME.ARTIFACT_01:
                 this.item_object_dict[new_item] = Instantiate(artifact_01_prefab, new Vector3(new_item.pos_x, new_item.pos_y, 0), Quaternion.identity);
+                break;
+            case ITEM_NAME.FOOD_01:
+                this.item_object_dict[new_item] = Instantiate(food_01_prefab, new Vector3(new_item.pos_x, new_item.pos_y, 0), Quaternion.identity);
                 break;
         }
     }

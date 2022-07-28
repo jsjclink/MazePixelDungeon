@@ -279,7 +279,7 @@ public class SquareRoomMapInfo : MapInfo
 
             item_list.Add(new ItemInfo(spawn_x, spawn_y, item_type, SPECIFIC_ITEM_TYPE.NONE, item_name, UnityEngine.Random.Range(0, 3), this.hierarchy_idx, this.layer_idx, this.map_idx));
         }
-        /*
+        
         for(int i = 0; i < 3; i++)
         {
             int idx = UnityEngine.Random.Range(0, space_list.Count);
@@ -287,8 +287,8 @@ public class SquareRoomMapInfo : MapInfo
             int spawn_y = UnityEngine.Random.Range(space_list[idx].start_y + 1, space_list[idx].end_y - 1);
             ITEM_TYPE item_type = ITEM_TYPE.FOOD;
             ITEM_NAME item_name = ITEM_NAME.FOOD_01;
-            item_list.Add(new ItemInfo(spawn_x, spawn_y, item_type, SPECIFIC_ITEM_TYPE.NONE, item_name, 0));
-        }*/
+            item_list.Add(new ItemInfo(spawn_x, spawn_y, item_type, SPECIFIC_ITEM_TYPE.NONE, item_name, 0, this.hierarchy_idx, this.layer_idx, this.map_idx));
+        }
         return item_list;
     }
 
