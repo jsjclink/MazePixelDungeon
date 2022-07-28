@@ -256,7 +256,7 @@ public class SquareRoomMapInfo : MapInfo
             int spawn_x = UnityEngine.Random.Range(space_list[idx].start_x + 1, space_list[idx].end_x - 1);
             int spawn_y = UnityEngine.Random.Range(space_list[idx].start_y + 1, space_list[idx].end_y - 1);
             //¼ö ¹Ù²î¸é ¹Ù²ãÁà¾ßÇÔ
-            ITEM_TYPE[] item_type_pool = { ITEM_TYPE.WEAPON, ITEM_TYPE.ARMOR, ITEM_TYPE.ARTIFACT };
+            ITEM_TYPE[] item_type_pool = { ITEM_TYPE.WEAPON, ITEM_TYPE.ARMOR, ITEM_TYPE.WEAPON, ITEM_TYPE.ARMOR, ITEM_TYPE.RING, ITEM_TYPE.ARTIFACT };
             ITEM_TYPE item_type = item_type_pool[UnityEngine.Random.Range(0, item_type_pool.Length)];
 
             ITEM_NAME[] item_name_pool;
@@ -271,6 +271,10 @@ public class SquareRoomMapInfo : MapInfo
                     item_name_pool = new ITEM_NAME[] { ITEM_NAME.ARMOR_01, ITEM_NAME.ARMOR_02 };
                     item_name = item_name_pool[UnityEngine.Random.Range(0, item_name_pool.Length)];
                     break;
+                case ITEM_TYPE.RING:
+                    item_name_pool = new ITEM_NAME[] { ITEM_NAME.RING_01, ITEM_NAME.RING_02 };
+                    item_name = item_name_pool[UnityEngine.Random.Range(0, item_name_pool.Length)];
+                    break;
                 case ITEM_TYPE.ARTIFACT:
                     item_name_pool = new ITEM_NAME[] { ITEM_NAME.ARTIFACT_01 };
                     item_name = item_name_pool[UnityEngine.Random.Range(0, item_name_pool.Length)];
@@ -280,13 +284,22 @@ public class SquareRoomMapInfo : MapInfo
             item_list.Add(new ItemInfo(spawn_x, spawn_y, item_type, SPECIFIC_ITEM_TYPE.NONE, item_name, UnityEngine.Random.Range(0, 3), this.hierarchy_idx, this.layer_idx, this.map_idx));
         }
         
-        for(int i = 0; i < 3; i++)
+        for(int i = 0; i < 2; i++)
         {
             int idx = UnityEngine.Random.Range(0, space_list.Count);
             int spawn_x = UnityEngine.Random.Range(space_list[idx].start_x + 1, space_list[idx].end_x - 1);
             int spawn_y = UnityEngine.Random.Range(space_list[idx].start_y + 1, space_list[idx].end_y - 1);
             ITEM_TYPE item_type = ITEM_TYPE.FOOD;
             ITEM_NAME item_name = ITEM_NAME.FOOD_01;
+            item_list.Add(new ItemInfo(spawn_x, spawn_y, item_type, SPECIFIC_ITEM_TYPE.NONE, item_name, 0, this.hierarchy_idx, this.layer_idx, this.map_idx));
+        }
+        for(int i = 0; i < 2; i++)
+        {
+            int idx = UnityEngine.Random.Range(0, space_list.Count);
+            int spawn_x = UnityEngine.Random.Range(space_list[idx].start_x + 1, space_list[idx].end_x - 1);
+            int spawn_y = UnityEngine.Random.Range(space_list[idx].start_y + 1, space_list[idx].end_y - 1);
+            ITEM_TYPE item_type = ITEM_TYPE.POTION;
+            ITEM_NAME item_name = ITEM_NAME.POTION_HP;
             item_list.Add(new ItemInfo(spawn_x, spawn_y, item_type, SPECIFIC_ITEM_TYPE.NONE, item_name, 0, this.hierarchy_idx, this.layer_idx, this.map_idx));
         }
         return item_list;

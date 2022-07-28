@@ -97,8 +97,18 @@ public class EquipOrUse : MonoBehaviour, IPointerClickHandler
             switch (inven.items[idx].item_name)
             {
                 case ITEM_NAME.FOOD_01:
+                    game_system_manager.player_info.item_list.Remove(inven.items[idx]);
+                    game_system_manager.player_info.hunger += 300;
                     game_system_manager.player_info.cur_hp += 5;
                     game_system_manager.HP_bar.GetComponent<Slider>().value += 5;
+                    break;
+                case ITEM_NAME.POTION_HP:
+                    if(game_system_manager.player_info.cur_hp + 30 < game_system_manager.player_info.max_hp)
+                    {
+                        game_system_manager.player_info.item_list.Remove(inven.items[idx]);
+                        game_system_manager.player_info.cur_hp += 30;
+                        game_system_manager.HP_bar.GetComponent<Slider>().value += 30;
+                    }
                     break;
             }
             inven.items.RemoveAt(idx);

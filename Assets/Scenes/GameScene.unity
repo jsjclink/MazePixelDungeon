@@ -3391,6 +3391,7 @@ MonoBehaviour:
   ring_01_prefab: {fileID: 8296374229807625939, guid: f1e1e88a2a4176140bf0f30a8a8d14e1, type: 3}
   ring_02_prefab: {fileID: 4475790950863425178, guid: 11a9d1f35dcf9d74fb0cf4f51dd0e189, type: 3}
   food_01_prefab: {fileID: 2833376657011149353, guid: cc07f4e8c7ddef34fab7225971fc8204, type: 3}
+  potion_hp_prefab: {fileID: 7709543714151350968, guid: 02cb46a69ca51894facaa557360777fd, type: 3}
   HP_bar: {fileID: 504917780}
   Layer: {fileID: 293519030}
   player_object: {fileID: 1054705958}

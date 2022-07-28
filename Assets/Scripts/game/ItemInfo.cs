@@ -5,7 +5,7 @@ using System;
 
 public enum ITEM_TYPE
 {
-    WEAPON, ARMOR, ARTIFACT, FOOD
+    WEAPON, ARMOR, ARTIFACT, FOOD, POTION, RING
 }
 public enum SPECIFIC_ITEM_TYPE
 {
@@ -13,7 +13,7 @@ public enum SPECIFIC_ITEM_TYPE
 }
 public enum ITEM_NAME
 {
-    NONE, SWORD_01, AX_01, ARTIFACT_01, ARTIFACT_02, ARTIFACT_03, ARMOR_01, ARMOR_02, FOOD_01
+    NONE, SWORD_01, AX_01, ARTIFACT_01, ARTIFACT_02, ARTIFACT_03, ARMOR_01, ARMOR_02, FOOD_01, POTION_HP, RING_01, RING_02
 }
 
 [Serializable]
@@ -65,6 +65,15 @@ public class ItemInfo
                 break;
             case ITEM_NAME.FOOD_01:
                 this.item_image = sprites[275];
+                break;
+            case ITEM_NAME.POTION_HP:
+                this.item_image = sprites[212];
+                break;
+            case ITEM_NAME.RING_01:
+                this.item_image = sprites[139];
+                break;
+            case ITEM_NAME.RING_02:
+                this.item_image = sprites[141];
                 break;
         }
     }
