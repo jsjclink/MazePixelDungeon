@@ -462,7 +462,8 @@ public class GameSystemManager : MonoBehaviour
                 {
                     if (item.item_name == ITEM_NAME.ARTIFACT_01) artifact_01_cnt++;
                 }
-                this.player_info.cur_hp += artifact_01_cnt;
+                if (this.player_info.cur_hp + artifact_01_cnt > 100) this.player_info.cur_hp = 100;
+                else this.player_info.cur_hp += artifact_01_cnt;
                 if (this.player_info.hunger < 0)
                 {
                     this.player_info.cur_hp -= 2;
@@ -988,12 +989,10 @@ public class GameSystemManager : MonoBehaviour
             this.player_info.item_list.Add(new ItemInfo(0, 0, ITEM_TYPE.SCROLL, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.SCROLL_SHEEP, 0, 0, 0, 0));
             this.player_info.item_list.Add(new ItemInfo(0, 0, ITEM_TYPE.SCROLL, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.SCROLL_SHEEP, 0, 0, 0, 0));
             this.player_info.item_list.Add(new ItemInfo(0, 0, ITEM_TYPE.ARMOR, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.ARMOR_01, 0, 0, 0, 0));
-            this.player_info.item_list.Add(new ItemInfo(0, 0, ITEM_TYPE.ARMOR, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.ARMOR_02, 0, 0, 0, 0));
-            this.player_info.item_list.Add(new ItemInfo(0, 0, ITEM_TYPE.WEAPON, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.AX_01, 0, 0, 0, 0));
             this.player_info.item_list.Add(new ItemInfo(0, 0, ITEM_TYPE.WEAPON, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.SWORD_01, 0, 0, 0, 0));
             this.player_info.item_list.Add(new ItemInfo(0, 0, ITEM_TYPE.FOOD, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.FOOD_01, 0, 0, 0, 0));
-            this.player_info.item_list.Add(new ItemInfo(0, 0, ITEM_TYPE.FOOD, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.FOOD_01, 0, 0, 0, 0));
             this.player_info.item_list.Add(new ItemInfo(0, 0, ITEM_TYPE.POTION, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.POTION_HP, 0, 0, 0, 0));
+            this.player_info.item_list.Add(new ItemInfo(0, 0, ITEM_TYPE.ARTIFACT, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.ARTIFACT_01, 0, 0, 0, 0));
         }
         //set player position
         if (game_loaded)
