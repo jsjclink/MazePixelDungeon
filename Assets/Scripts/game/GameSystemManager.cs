@@ -463,7 +463,11 @@ public class GameSystemManager : MonoBehaviour
                     if (item.item_name == ITEM_NAME.ARTIFACT_01) artifact_01_cnt++;
                 }
                 if (this.player_info.cur_hp + artifact_01_cnt > 100) this.player_info.cur_hp = 100;
-                else this.player_info.cur_hp += artifact_01_cnt;
+                else
+                {
+                    this.player_info.cur_hp += artifact_01_cnt;
+                    this.HP_bar.GetComponent<Slider>().value += artifact_01_cnt;
+                }
                 if (this.player_info.hunger < 0)
                 {
                     this.player_info.cur_hp -= 2;

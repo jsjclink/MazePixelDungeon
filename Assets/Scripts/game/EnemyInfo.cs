@@ -11,7 +11,7 @@ public class EnemyInfo: UnitInfo{
 
     public int pos_x;
     public int pos_y;
-    public int hp = 10;
+    public int hp = 15;
     public int attack_pt = 5;
 
     public ANIMATION_STATE animation_state;

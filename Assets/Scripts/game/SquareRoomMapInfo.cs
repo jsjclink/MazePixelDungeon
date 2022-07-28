@@ -234,7 +234,7 @@ public class SquareRoomMapInfo : MapInfo
     private List<EnemyInfo> CreateEnemies()
     {
         List<EnemyInfo> enemy_list = new List<EnemyInfo>();
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 15; i++)
         {
             int idx = UnityEngine.Random.Range(0, space_list.Count);
             int spawn_x = UnityEngine.Random.Range(space_list[idx].start_x + 1, space_list[idx].end_x - 1);
