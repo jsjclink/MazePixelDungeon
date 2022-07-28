@@ -900,6 +900,30 @@ public class GameSystemManager : MonoBehaviour
             this.HP_bar.GetComponent<Slider>().maxValue = this.player_info.max_hp;
             this.HP_bar.GetComponent<Slider>().value = this.player_info.cur_hp;
 
+            //equip_list_ui_init
+            foreach (ItemInfo equip_item in this.player_info.equip_list)
+            {
+
+                switch (equip_item.item_type)
+                {
+                    case ITEM_TYPE.WEAPON:
+                        GameObject.Find("Canvas").transform.Find("InvenPopUp").transform.Find("Inventory").transform.Find("Base").transform.Find("Bag").transform.Find("WeaponEquipSlot").GetChild(0).GetComponent<EquipSlot>().item = equip_item;
+                        break;
+                    case ITEM_TYPE.ARMOR:
+                        GameObject.Find("Canvas").transform.Find("InvenPopUp").transform.Find("Inventory").transform.Find("Base").transform.Find("Bag").transform.Find("ArmorEquipSlot").GetChild(0).GetComponent<EquipSlot>().item = equip_item;
+                        break;
+                    case ITEM_TYPE.ARTIFACT:
+                        if (GameObject.Find("Canvas").transform.Find("InvenPopUp").transform.Find("Inventory").transform.Find("Base").transform.Find("Bag").transform.Find("ArtifactEquipSlot1").GetChild(0).GetComponent<EquipSlot>().item == null)
+                            GameObject.Find("Canvas").transform.Find("InvenPopUp").transform.Find("Inventory").transform.Find("Base").transform.Find("Bag").transform.Find("ArtifactEquipSlot1").GetChild(0).GetComponent<EquipSlot>().item = equip_item;
+                        else
+                            GameObject.Find("Canvas").transform.Find("InvenPopUp").transform.Find("Inventory").transform.Find("Base").transform.Find("Bag").transform.Find("ArtifactEquipSlot2").GetChild(0).GetComponent<EquipSlot>().item = equip_item;
+                        break;
+                    case ITEM_TYPE.RING:
+                        GameObject.Find("Canvas").transform.Find("InvenPopUp").transform.Find("Inventory").transform.Find("Base").transform.Find("Bag").transform.Find("RingEquipSlot").GetChild(0).GetComponent<EquipSlot>().item = equip_item;
+                        break;
+                }
+            }
+
             Debug.Log("item_list : " + this.item_list.Count);
         }
         else

@@ -23,6 +23,8 @@ public class EquipOrUse : MonoBehaviour, IPointerClickHandler
                 case (ITEM_TYPE.WEAPON):
                     if (GameObject.Find("WeaponEquipSlot").transform.GetChild(0).GetComponent<EquipSlot>().item == null)
                     {
+                        game_system_manager.player_info.item_list.Remove(inven.items[idx]);
+                        game_system_manager.player_info.equip_list.Add(inven.items[idx]);
                         GameObject.Find("WeaponEquipSlot").transform.GetChild(0).GetComponent<EquipSlot>().item = inven.items[idx];
                         inven.items.RemoveAt(idx);
                         inven.FreeSlot();
@@ -30,6 +32,11 @@ public class EquipOrUse : MonoBehaviour, IPointerClickHandler
                     }
                     else
                     {
+                        game_system_manager.player_info.item_list.Remove(inven.items[idx]);
+                        game_system_manager.player_info.item_list.Add(GameObject.Find("WeaponEquipSlot").transform.GetChild(0).GetComponent<EquipSlot>().item);
+                        game_system_manager.player_info.equip_list.Remove(GameObject.Find("WeaponEquipSlot").transform.GetChild(0).GetComponent<EquipSlot>().item);
+                        game_system_manager.player_info.equip_list.Add(inven.items[idx]);
+
                         ItemInfo temp = inven.items[idx];
                         inven.items[idx] = GameObject.Find("WeaponEquipSlot").transform.GetChild(0).GetComponent<EquipSlot>().item;
                         GameObject.Find("WeaponEquipSlot").transform.GetChild(0).GetComponent<EquipSlot>().item = temp;
@@ -40,6 +47,8 @@ public class EquipOrUse : MonoBehaviour, IPointerClickHandler
                 case (ITEM_TYPE.ARMOR):
                     if (GameObject.Find("ArmorEquipSlot").transform.GetChild(0).GetComponent<EquipSlot>().item == null)
                     {
+                        game_system_manager.player_info.item_list.Remove(inven.items[idx]);
+                        game_system_manager.player_info.equip_list.Add(inven.items[idx]);
                         GameObject.Find("ArmorEquipSlot").transform.GetChild(0).GetComponent<EquipSlot>().item = inven.items[idx];
                         inven.items.RemoveAt(idx);
                         inven.FreeSlot();
@@ -47,6 +56,11 @@ public class EquipOrUse : MonoBehaviour, IPointerClickHandler
                     }
                     else
                     {
+                        game_system_manager.player_info.item_list.Remove(inven.items[idx]);
+                        game_system_manager.player_info.item_list.Add(GameObject.Find("ArmorEquipSlot").transform.GetChild(0).GetComponent<EquipSlot>().item);
+                        game_system_manager.player_info.equip_list.Remove(GameObject.Find("ArmorEquipSlot").transform.GetChild(0).GetComponent<EquipSlot>().item);
+                        game_system_manager.player_info.equip_list.Add(inven.items[idx]);
+
                         ItemInfo temp = inven.items[idx];
                         inven.items[idx] = GameObject.Find("ArmorEquipSlot").transform.GetChild(0).GetComponent<EquipSlot>().item;
                         GameObject.Find("ArmorEquipSlot").transform.GetChild(0).GetComponent<EquipSlot>().item = temp;
@@ -57,6 +71,8 @@ public class EquipOrUse : MonoBehaviour, IPointerClickHandler
                 case (ITEM_TYPE.ARTIFACT):
                     if (GameObject.Find("ArtifactEquipSlot1").transform.GetChild(0).GetComponent<EquipSlot>().item == null && GameObject.Find("ArtifactEquipSlot2").transform.GetChild(0).GetComponent<EquipSlot>().item == null)
                     {
+                        game_system_manager.player_info.item_list.Remove(inven.items[idx]);
+                        game_system_manager.player_info.equip_list.Add(inven.items[idx]);
                         GameObject.Find("ArtifactEquipSlot1").transform.GetChild(0).GetComponent<EquipSlot>().item = inven.items[idx];
                         inven.items.RemoveAt(idx);
                         inven.FreeSlot();
@@ -64,6 +80,8 @@ public class EquipOrUse : MonoBehaviour, IPointerClickHandler
                     }
                     else if (GameObject.Find("ArtifactEquipSlot1").transform.GetChild(0).GetComponent<EquipSlot>().item != null && GameObject.Find("ArtifactEquipSlot2").transform.GetChild(0).GetComponent<EquipSlot>().item == null)
                     {
+                        game_system_manager.player_info.item_list.Remove(inven.items[idx]);
+                        game_system_manager.player_info.equip_list.Add(inven.items[idx]);
                         GameObject.Find("ArtifactEquipSlot2").transform.GetChild(0).GetComponent<EquipSlot>().item = inven.items[idx];
                         inven.items.RemoveAt(idx);
                         inven.FreeSlot();
@@ -71,6 +89,8 @@ public class EquipOrUse : MonoBehaviour, IPointerClickHandler
                     }
                     else if (GameObject.Find("ArtifactEquipSlot1").transform.GetChild(0).GetComponent<EquipSlot>().item == null && GameObject.Find("ArtifactEquipSlot2").transform.GetChild(0).GetComponent<EquipSlot>().item != null)
                     {
+                        game_system_manager.player_info.item_list.Remove(inven.items[idx]);
+                        game_system_manager.player_info.equip_list.Add(inven.items[idx]);
                         GameObject.Find("ArtifactEquipSlot1").transform.GetChild(0).GetComponent<EquipSlot>().item = inven.items[idx];
                         inven.items.RemoveAt(idx);
                         inven.FreeSlot();
@@ -78,6 +98,11 @@ public class EquipOrUse : MonoBehaviour, IPointerClickHandler
                     }
                     else
                     {
+                        game_system_manager.player_info.item_list.Remove(inven.items[idx]);
+                        game_system_manager.player_info.item_list.Add(GameObject.Find("ArtifactEquipSlot1").transform.GetChild(0).GetComponent<EquipSlot>().item);
+                        game_system_manager.player_info.equip_list.Remove(GameObject.Find("ArtifactEquipSlot1").transform.GetChild(0).GetComponent<EquipSlot>().item);
+                        game_system_manager.player_info.equip_list.Add(inven.items[idx]);
+
                         ItemInfo temp = inven.items[idx];
                         inven.items[idx] = GameObject.Find("ArtifactEquipSlot1").transform.GetChild(0).GetComponent<EquipSlot>().item;
                         GameObject.Find("ArtifactEquipSlot1").transform.GetChild(0).GetComponent<EquipSlot>().item = temp;
@@ -88,6 +113,8 @@ public class EquipOrUse : MonoBehaviour, IPointerClickHandler
                 case (ITEM_TYPE.RING):
                     if (GameObject.Find("RingEquipSlot").transform.GetChild(0).GetComponent<EquipSlot>().item == null)
                     {
+                        game_system_manager.player_info.item_list.Remove(inven.items[idx]);
+                        game_system_manager.player_info.equip_list.Add(inven.items[idx]);
                         GameObject.Find("RingEquipSlot").transform.GetChild(0).GetComponent<EquipSlot>().item = inven.items[idx];
                         inven.items.RemoveAt(idx);
                         inven.FreeSlot();
@@ -95,6 +122,10 @@ public class EquipOrUse : MonoBehaviour, IPointerClickHandler
                     }
                     else
                     {
+                        game_system_manager.player_info.item_list.Remove(inven.items[idx]);
+                        game_system_manager.player_info.item_list.Add(GameObject.Find("RingEquipSlot").transform.GetChild(0).GetComponent<EquipSlot>().item);
+                        game_system_manager.player_info.equip_list.Remove(GameObject.Find("RingEquipSlot").transform.GetChild(0).GetComponent<EquipSlot>().item);
+                        game_system_manager.player_info.equip_list.Add(inven.items[idx]);
                         ItemInfo temp = inven.items[idx];
                         inven.items[idx] = GameObject.Find("RingEquipSlot").transform.GetChild(0).GetComponent<EquipSlot>().item;
                         GameObject.Find("RingEquipSlot").transform.GetChild(0).GetComponent<EquipSlot>().item = temp;
