@@ -162,6 +162,12 @@ public class EquipOrUse : MonoBehaviour, IPointerClickHandler
                         game_system_manager.player_info.cur_hp += 30;
                         game_system_manager.HP_bar.GetComponent<Slider>().value += 30;
                     }
+                    else
+                    {
+                        game_system_manager.player_info.item_list.Remove(inven.items[idx]);
+                        game_system_manager.player_info.cur_hp = 100;
+                        game_system_manager.HP_bar.GetComponent<Slider>().value = 100;
+                    }
                     break;
                 case ITEM_NAME.SCROLL_BOSS:
                     game_system_manager.player_info.item_list.Remove(inven.items[idx]);
