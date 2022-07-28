@@ -34,18 +34,25 @@ asset을 제외한 모든 게임 시스템은 독자적으로 만들었습니다
 턴마다 게임이 세이브 됩니다. 신중하게 플레이하세요!
 
 <p>
-  <img width="30%" height="30%" src="https://user-images.githubusercontent.com/60886172/181493886-74afeb6a-cd9b-4077-90cd-00043581869b.jpg">
-  <img width="30%" height="30%" src="https://user-images.githubusercontent.com/60886172/181493895-504404cd-4f59-411e-b0e7-9f99e396a09f.jpg">
-  <img width="30%" height="30%" src="https://user-images.githubusercontent.com/60886172/181493929-aa8b7d0e-1059-4bdc-90eb-200e15b07cc6.jpg">
+  <img width="30%" height="30%" src="https://user-images.githubusercontent.com/60886172/181494387-ec24c29c-1a54-4aea-b20e-3477bab7093a.jpg">
+  <img width="30%" height="30%" src="https://user-images.githubusercontent.com/60886172/181494405-9b6d176a-f6dc-4f64-a976-37e13b87520d.jpg">
+  <img width="30%" height="30%" src="https://user-images.githubusercontent.com/60886172/181494416-5020be19-4cd3-48dd-98cd-5312893be6e3.jpg">
 </p>
 
+<p>
+  <img width="30%" height="30%" src="https://user-images.githubusercontent.com/60886172/181494445-319ec920-7e28-4d0d-a6c6-aaa17d78d532.jpg">
+  <img width="30%" height="30%" src="https://user-images.githubusercontent.com/60886172/181494436-730fbf66-8f4e-4d4f-ab16-ec0a7abec80f.jpg">
+  <img width="30%" height="30%" src="https://user-images.githubusercontent.com/60886172/181494484-10547076-875b-4f3b-a561-1a8e87874eed.jpg">
+</p>
 
+<p>
+  <img width="30%" height="30%" src="https://user-images.githubusercontent.com/60886172/181494725-9851f60f-51c3-4ace-904e-6af7e9bdbd25.jpg">
+  <img width="30%" height="30%" src="https://user-images.githubusercontent.com/60886172/181494494-30c448b8-e1e7-46f1-b6d3-b87051856642.png">
+  <img width="30%" height="30%" src="https://user-images.githubusercontent.com/60886172/181494714-acf5849e-3071-4dab-beb6-fd3ca7173104.jpg">
+</p>
 
 
 # 기타
 
 게임 시작 화면에 웅장한 bgm을 감상하세요
 
-<p>
-  <img width="30%" height="30%" src="https://user-images.githubusercontent.com/60886172/181493892-a60a64f7-e0a9-4581-9b18-df9ca4f2c0be.jpg">
-</p>
