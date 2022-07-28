@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -5,6 +7,9 @@ using UnityEngine.UI;
 
 public class EquipOrUse : MonoBehaviour, IPointerClickHandler
 {
+    [SerializeField]
+    GameObject sheep_prefab;
+
     public void OnPointerClick(PointerEventData eventData)
     {
         Inventory inven = GameObject.Find("Inventory").GetComponent<Inventory>();
@@ -108,6 +113,27 @@ public class EquipOrUse : MonoBehaviour, IPointerClickHandler
                         game_system_manager.player_info.item_list.Remove(inven.items[idx]);
                         game_system_manager.player_info.cur_hp += 30;
                         game_system_manager.HP_bar.GetComponent<Slider>().value += 30;
+                    }
+                    break;
+                case ITEM_NAME.SCROLL_BOSS:
+                    game_system_manager.player_info.item_list.Remove(inven.items[idx]);
+                    game_system_manager.ChangeMap(game_system_manager.cur_map_info, game_system_manager.dungeon.hierarchy_list[game_system_manager.cur_map_info.hierarchy_idx + 1].mapInfos_of_layer[0][0]);
+                    break;
+                case ITEM_NAME.SCROLL_SHEEP:
+                    game_system_manager.player_info.item_list.Remove(inven.items[idx]);
+                    List<EnemyInfo> change_list = new List<EnemyInfo>();
+                    foreach(EnemyInfo enemy in game_system_manager.enemy_list)
+                    {
+                        if(game_system_manager.player_info.PlayerSight(enemy.pos_x, enemy.pos_y, game_system_manager.terrain_info_arr))
+                        {
+                            change_list.Add(enemy);
+                        }
+                    }
+                    foreach(EnemyInfo enemy in change_list)
+                    {
+                        game_system_manager.enemy_list.Remove(enemy);
+                        Destroy(game_system_manager.enemy_object_dict[enemy]);
+                        Instantiate(sheep_prefab, new Vector3(enemy.pos_x, enemy.pos_y, 0), Quaternion.identity);
                     }
                     break;
             }

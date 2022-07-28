@@ -1078,6 +1078,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6bee4991e2b61f48a6f5f5db90904a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  sheep_prefab: {fileID: 7700955765390144829, guid: f32acca1e79997e45af2a5f1c91ccec9, type: 3}
 --- !u!1 &5209829790846245798
 GameObject:
   m_ObjectHideFlags: 0

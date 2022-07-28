@@ -188,15 +188,15 @@ public class GameSystemManager : MonoBehaviour
     float touch_began_time;
     float prev_action_time;
 
-    Dungeon dungeon;
+    public Dungeon dungeon;
     public PlayerInfo player_info;
 
-    MapInfo cur_map_info;
-    TerrainInfo[,] terrain_info_arr;
+    public MapInfo cur_map_info;
+    public TerrainInfo[,] terrain_info_arr;
     GameObject[,] terrain_object_arr;
     GameObject[,] shadow_object_arr;
-    List<EnemyInfo> enemy_list;
-    Dictionary<EnemyInfo, GameObject> enemy_object_dict;
+    public List<EnemyInfo> enemy_list;
+    public Dictionary<EnemyInfo, GameObject> enemy_object_dict;
     public List<ItemInfo> item_list;
     public Dictionary<ItemInfo, GameObject> item_object_dict;
 
@@ -522,7 +522,7 @@ public class GameSystemManager : MonoBehaviour
         
     }
 
-    private void ChangeMap(MapInfo from, MapInfo to)
+    public void ChangeMap(MapInfo from, MapInfo to)
     {
         //이전 object 삭제
         for(int i = 0; i < this.terrain_object_arr.GetLength(0); i++)
@@ -884,6 +884,10 @@ public class GameSystemManager : MonoBehaviour
             this.shadow_object_arr = new GameObject[this.terrain_info_arr.GetLength(0), this.terrain_info_arr.GetLength(1)];
             this.enemy_object_dict = new Dictionary<EnemyInfo, GameObject>();
             this.item_object_dict = new Dictionary<ItemInfo, GameObject>();
+
+            this.player_info.item_list.Add(new ItemInfo(0, 0, ITEM_TYPE.SCROLL, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.SCROLL_BOSS, 0, 0, 0, 0));
+            this.player_info.item_list.Add(new ItemInfo(0, 0, ITEM_TYPE.SCROLL, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.SCROLL_SHEEP, 0, 0, 0, 0));
+            this.player_info.item_list.Add(new ItemInfo(0, 0, ITEM_TYPE.SCROLL, SPECIFIC_ITEM_TYPE.NONE, ITEM_NAME.SCROLL_SHEEP, 0, 0, 0, 0));
         }
         //set player position
         if (game_loaded)
