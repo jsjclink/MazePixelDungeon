@@ -4,7 +4,7 @@ using UnityEngine;
 
 public enum UNIT_TYPE
 {
-    PLAYER, ENEMY_RAT, ENEMY_GNOLL, ENEMY_CRAB
+    PLAYER, ENEMY_RAT, ENEMY_GNOLL, ENEMY_CRAB, ENEMY_BOOS_01
 }
 public enum UNIT_STATE
 {

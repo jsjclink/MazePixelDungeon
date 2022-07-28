@@ -244,6 +244,17 @@ public class SquareRoomMapInfo : MapInfo
             UNIT_TYPE unit_type = unit_type_pool[UnityEngine.Random.Range(0, unit_type_pool.Length)];
             enemy_list.Add(new EnemyInfo(unit_type, spawn_x, spawn_y, this.hierarchy_idx, this.layer_idx, this.map_idx));
         }
+        if(this.hierarchy_idx > 0 && this.layer_idx == 0 && this.map_idx == 0)
+        {
+            int idx = UnityEngine.Random.Range(0, space_list.Count);
+            int spawn_x = UnityEngine.Random.Range(space_list[idx].start_x + 1, space_list[idx].end_x - 1);
+            int spawn_y = UnityEngine.Random.Range(space_list[idx].start_y + 1, space_list[idx].end_y - 1);
+            UNIT_TYPE unit_type = UNIT_TYPE.ENEMY_BOOS_01;
+            EnemyInfo boss = new EnemyInfo(unit_type, spawn_x, spawn_y, this.hierarchy_idx, this.layer_idx, this.map_idx);
+            boss.hp = 100;
+            boss.attack_pt = 10;
+            enemy_list.Add(boss);
+        }
         return enemy_list;
     }
 

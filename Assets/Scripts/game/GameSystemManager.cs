@@ -149,6 +149,8 @@ public class GameSystemManager : MonoBehaviour
     GameObject enemy_gnoll_prefab;
     [SerializeField]
     GameObject enemy_crab_prefab;
+    [SerializeField]
+    GameObject boss_01_prefab;
 
     [SerializeField]
     GameObject sword_01_prefab;
@@ -359,8 +361,8 @@ public class GameSystemManager : MonoBehaviour
                         break;
                     case TURN_TYPE.ENEMY_TURN:
                         ((EnemyInfo)turn_info.unit).animation_state = ANIMATION_STATE.ENGAGING;
-                        this.player_info.cur_hp -= 5;
-                        this.HP_bar.GetComponent<Slider>().value -= 5;
+                        this.player_info.cur_hp -= ((EnemyInfo)turn_info.unit).attack_pt;
+                        this.HP_bar.GetComponent<Slider>().value -= ((EnemyInfo)turn_info.unit).attack_pt;
                         if(this.player_info.cur_hp <= 0)
                         {
                             GameObject.Find("Canvas").transform.Find("GameOverPopUp").gameObject.SetActive(true);
@@ -669,6 +671,9 @@ public class GameSystemManager : MonoBehaviour
                     break;
                 case UNIT_TYPE.ENEMY_CRAB:
                     enemy_object_dict[cur] = Instantiate(enemy_crab_prefab, new Vector3(cur.pos_x, cur.pos_y, 0), Quaternion.identity);
+                    break;
+                case UNIT_TYPE.ENEMY_BOOS_01:
+                    enemy_object_dict[cur] = Instantiate(boss_01_prefab, new Vector3(cur.pos_x, cur.pos_y, 0), Quaternion.identity);
                     break;
             }
         }
@@ -995,6 +1000,9 @@ public class GameSystemManager : MonoBehaviour
                     break;
                 case UNIT_TYPE.ENEMY_CRAB:
                     enemy_object_dict[cur] = Instantiate(enemy_crab_prefab, new Vector3(cur.pos_x, cur.pos_y, 0), Quaternion.identity);
+                    break;
+                case UNIT_TYPE.ENEMY_BOOS_01:
+                    enemy_object_dict[cur] = Instantiate(boss_01_prefab, new Vector3(cur.pos_x, cur.pos_y, 0), Quaternion.identity);
                     break;
             }  
         }
