@@ -56,3 +56,40 @@ asset을 제외한 모든 게임 시스템은 독자적으로 만들었습니다
 
 게임 시작 화면에 웅장한 bgm을 감상하세요
 
+# wiki 일부 중요한 내용
+# 01 hierarachy와 layer, map이라는 개념
+픽던 보면 1층-5층 6층-10층 과 같이 5층마다 맵 컨셉이 바뀌는데 이렇게 한 컨셉으로 묶인 층들을 hierarchy로 부르고
+layer는 층
+map은 실제 플레이 하는 맵을 의미함
+
+# 01-1 layer
+
+픽던은 한 층에서 내려가면 바로 다음층으로 내려가짐
+이 게임은 한 층에 여러 맵이 존재하고 그 맵들이 다른 층, 같은 층과 연결돼있음
+
+# 01-2 random layer generator
+생성한 맵 구조가 다음과 같음
+
+hierarchy1, 2가 연결된 모습
+
+![layer](https://user-images.githubusercontent.com/60886172/180501936-011ecdd8-fd56-40a7-9681-ab8c89e0e5d1.JPG)
+
+hierarchy1
+
+![layer1](https://user-images.githubusercontent.com/60886172/180501968-9fa63e0d-f332-4021-a184-3745f83b57e0.JPG)
+
+hierarchy2
+
+![layer2](https://user-images.githubusercontent.com/60886172/180501977-51bea9ec-f106-4d64-badb-87085ea5becd.JPG)
+
+# 01-2 map
+
+random map generator를 만들어서 사각형 모양의 맵을 생성함
+
+![map](https://user-images.githubusercontent.com/60886172/180502963-ee10604c-ece1-4a02-be8e-a8da71d8c9df.JPG)
+
+<p>
+  <img width="30%" height="30%" src="https://user-images.githubusercontent.com/60886172/180503015-4997f04d-89ec-4fcb-a3e0-dbddee4ea593.jpg">
+  <img width="30%" height="30%" src="https://user-images.githubusercontent.com/60886172/180503023-01f8d141-8a39-4b57-aac1-3d6bbc2126fb.jpg">
+</p>
+
