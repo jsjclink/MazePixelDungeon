@@ -23,6 +23,7 @@ public class Inventory : MonoBehaviour
         slots = slot_parent.GetComponentsInChildren<Slot>();
 
         FreeSlot();
+
     }
 
     public void FreeSlot()

@@ -85,6 +85,7 @@ public class Slot : MonoBehaviour, IPointerClickHandler
                 case ITEM_TYPE.WEAPON:
                 case ITEM_TYPE.ARMOR:
                 case ITEM_TYPE.ARTIFACT:
+                case ITEM_TYPE.RING:
                     item_info.GetComponentsInChildren<TMP_Text>()[2].text = "EQUIP";
                     break;
                 default:
