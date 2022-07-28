@@ -72,6 +72,12 @@ public class EquipSlot : MonoBehaviour, IPointerClickHandler
                 case ITEM_NAME.RING_02:
                     item_info.GetComponentsInChildren<TMP_Text>()[1].text = "MaxHP + 30";
                     break;
+                case ITEM_NAME.SCROLL_BOSS:
+                    item_info.GetComponentsInChildren<TMP_Text>()[1].text = "MOVE TO BOSS ROOM";
+                    break;
+                case ITEM_NAME.SCROLL_SHEEP:
+                    item_info.GetComponentsInChildren<TMP_Text>()[1].text = "CHANGE MONSTERS TO SHEEP IN SIGHT";
+                    break;
             }
 
             item_info.GetComponentsInChildren<TMP_Text>()[2].text = "UNEQUIP";
