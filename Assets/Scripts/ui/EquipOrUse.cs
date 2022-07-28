@@ -15,8 +15,6 @@ public class EquipOrUse : MonoBehaviour, IPointerClickHandler
         Inventory inven = GameObject.Find("Inventory").GetComponent<Inventory>();
         GameSystemManager game_system_manager = GameObject.Find("GameSystem").GetComponent<GameSystemManager>();
 
-
-
         if (GetComponentInChildren<TMP_Text>().text == "EQUIP")
         {
             int idx = int.Parse(transform.parent.parent.name.Split("_")[1]);
@@ -83,6 +81,23 @@ public class EquipOrUse : MonoBehaviour, IPointerClickHandler
                         ItemInfo temp = inven.items[idx];
                         inven.items[idx] = GameObject.Find("ArtifactEquipSlot1").transform.GetChild(0).GetComponent<EquipSlot>().item;
                         GameObject.Find("ArtifactEquipSlot1").transform.GetChild(0).GetComponent<EquipSlot>().item = temp;
+                        inven.FreeSlot();
+                        Destroy(transform.parent.parent.gameObject);
+                    }
+                    break;
+                case (ITEM_TYPE.RING):
+                    if (GameObject.Find("RingEquipSlot").transform.GetChild(0).GetComponent<EquipSlot>().item == null)
+                    {
+                        GameObject.Find("RingEquipSlot").transform.GetChild(0).GetComponent<EquipSlot>().item = inven.items[idx];
+                        inven.items.RemoveAt(idx);
+                        inven.FreeSlot();
+                        Destroy(transform.parent.parent.gameObject);
+                    }
+                    else
+                    {
+                        ItemInfo temp = inven.items[idx];
+                        inven.items[idx] = GameObject.Find("RingEquipSlot").transform.GetChild(0).GetComponent<EquipSlot>().item;
+                        GameObject.Find("RingEquipSlot").transform.GetChild(0).GetComponent<EquipSlot>().item = temp;
                         inven.FreeSlot();
                         Destroy(transform.parent.parent.gameObject);
                     }
