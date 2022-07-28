@@ -361,6 +361,10 @@ public class GameSystemManager : MonoBehaviour
                         ((EnemyInfo)turn_info.unit).animation_state = ANIMATION_STATE.ENGAGING;
                         this.player_info.cur_hp -= 5;
                         this.HP_bar.GetComponent<Slider>().value -= 5;
+                        if(this.player_info.cur_hp == 0)
+                        {
+                            GameObject.Find("Canvas").transform.Find("GameOverPopUp").gameObject.SetActive(true);
+                        }
                         break;
                 }
                 Debug.Log("playerInfo.hp" + this.player_info.cur_hp);
@@ -417,6 +421,10 @@ public class GameSystemManager : MonoBehaviour
                 {
                     this.player_info.cur_hp--;
                     this.HP_bar.GetComponent<Slider>().value -= 1;
+                    if (this.player_info.cur_hp == 0)
+                    {
+                        GameObject.Find("Canvas").transform.Find("GameOverPopUp").gameObject.SetActive(true);
+                    }
                 }
                 Debug.Log("Player_info : " + this.player_info.hunger);
             }
