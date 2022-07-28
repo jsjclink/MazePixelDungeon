@@ -148,7 +148,8 @@ public class EquipOrUse : MonoBehaviour, IPointerClickHandler
                     {
                         game_system_manager.enemy_list.Remove(enemy);
                         Destroy(game_system_manager.enemy_object_dict[enemy]);
-                        Instantiate(sheep_prefab, new Vector3(enemy.pos_x, enemy.pos_y, 0), Quaternion.identity);
+
+                        game_system_manager.CreateAndDestroySheep(enemy.pos_x, enemy.pos_y);
                     }
                     break;
             }

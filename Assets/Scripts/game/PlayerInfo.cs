@@ -22,6 +22,7 @@ public class PlayerInfo: UnitInfo{
     public ANIMATION_STATE animation_state;
 
     public List<ItemInfo> item_list;
+    public List<ItemInfo> equip_list;
 
     public PlayerInfo()
     {
@@ -37,8 +38,9 @@ public class PlayerInfo: UnitInfo{
         this.unit_state = UNIT_STATE.IDLE;
         this.animation_state = ANIMATION_STATE.IDLE;
         this.item_list = new List<ItemInfo>();
+        this.equip_list = new List<ItemInfo>();
     }
-    public PlayerInfo(int hierarchy_idx, int layer_idx, int map_idx, int max_hp, int cur_hp, int attack_pt, int pos_x, int pos_y, List<ItemInfo> item_list, int hunger)
+    public PlayerInfo(int hierarchy_idx, int layer_idx, int map_idx, int max_hp, int cur_hp, int attack_pt, int pos_x, int pos_y, List<ItemInfo> item_list, int hunger, List<ItemInfo> equip_list)
     {
         this.unit_type = UNIT_TYPE.PLAYER;
         this.cur_path = new List<(int, int)>();
@@ -56,6 +58,11 @@ public class PlayerInfo: UnitInfo{
         foreach (ItemInfo item in item_list)
         {
             this.item_list.Add(item);
+        }
+        this.equip_list = new List<ItemInfo>();
+        foreach (ItemInfo item in equip_list)
+        {
+            this.equip_list.Add(item);
         }
     }
 

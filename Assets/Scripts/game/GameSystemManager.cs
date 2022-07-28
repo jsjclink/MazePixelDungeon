@@ -151,6 +151,8 @@ public class GameSystemManager : MonoBehaviour
     GameObject enemy_crab_prefab;
     [SerializeField]
     GameObject boss_01_prefab;
+    [SerializeField]
+    GameObject sheep_prefab;
 
     [SerializeField]
     GameObject sword_01_prefab;
@@ -719,12 +721,18 @@ public class GameSystemManager : MonoBehaviour
             }
         }
 
-        //draw shadow
+        //create shadows
         for (int i = 0; i < this.terrain_object_arr.GetLength(0); i++)
         {
             for (int j = 0; j < this.terrain_object_arr.GetLength(1); j++)
             {
-                this.shadow_object_arr[i, j] = Instantiate(shadow_prefab, new Vector3(j, i, 0), Quaternion.identity);
+                GameObject shadow = Instantiate(shadow_prefab, new Vector3(j, i, 0), Quaternion.identity);
+                if (terrain_info_arr[i, j].in_player_sight == true)
+                {
+                    Color color = shadow.GetComponent<SpriteRenderer>().color;
+                    shadow.GetComponent<SpriteRenderer>().color = new Color(color.r, color.g, color.b, 0);
+                }
+                this.shadow_object_arr[i, j] = shadow;
             }
         }
 
@@ -857,7 +865,7 @@ public class GameSystemManager : MonoBehaviour
             {
                 load_dungeon.hierarchy_list[item.hierarchy_idx].mapInfos_of_layer[item.layer_idx][item.map_idx].item_list.Add(new ItemInfo(item.pos_x, item.pos_y, item.item_type, item.specific_item_type, item.item_name, item.enchant_cnt, item.hierarchy_idx, item.layer_idx, item.map_idx));
             }
-            this.player_info = new PlayerInfo(data.player_info.hierarchy_idx, data.player_info.layer_idx, data.player_info.map_idx, data.player_info.max_hp, data.player_info.cur_hp, data.player_info.attack_pt, data.player_info.pos_x, data.player_info.pos_y, data.player_info.item_list, data.player_info.hunger);
+            this.player_info = new PlayerInfo(data.player_info.hierarchy_idx, data.player_info.layer_idx, data.player_info.map_idx, data.player_info.max_hp, data.player_info.cur_hp, data.player_info.attack_pt, data.player_info.pos_x, data.player_info.pos_y, data.player_info.item_list, data.player_info.hunger, data.player_info.equip_list);
             this.dungeon = load_dungeon;
             this.cur_map_info = this.dungeon.hierarchy_list[this.player_info.hierarchy_idx].mapInfos_of_layer[this.player_info.layer_idx][this.player_info.map_idx];
             this.terrain_info_arr = (TerrainInfo[,])this.cur_map_info.terrain_info_arr.Clone();
@@ -1114,6 +1122,16 @@ public class GameSystemManager : MonoBehaviour
         yield return new WaitForSeconds(0.15f);
         Debug.Log("RESETANIMATION");
         animator.SetInteger("unit_state", 0);
+    }
+
+    public void CreateAndDestroySheep(int pos_x, int pos_y)
+    {
+        DestroySheep(Instantiate(sheep_prefab, new Vector3(pos_x, pos_y, 0), Quaternion.identity));
+    }
+    IEnumerator DestroySheep(GameObject game_object)
+    {
+        yield return new WaitForSeconds(1.0f);
+        Destroy(game_object);
     }
 
     public ItemInfo FindItemAt(int x, int y)
