@@ -38,7 +38,7 @@ public class PlayerInfo: UnitInfo{
         this.animation_state = ANIMATION_STATE.IDLE;
         this.item_list = new List<ItemInfo>();
     }
-    public PlayerInfo(int hierarchy_idx, int layer_idx, int map_idx, int max_hp, int cur_hp, int attack_pt, int pos_x, int pos_y, List<ItemInfo> item_list)
+    public PlayerInfo(int hierarchy_idx, int layer_idx, int map_idx, int max_hp, int cur_hp, int attack_pt, int pos_x, int pos_y, List<ItemInfo> item_list, int hunger)
     {
         this.unit_type = UNIT_TYPE.PLAYER;
         this.cur_path = new List<(int, int)>();

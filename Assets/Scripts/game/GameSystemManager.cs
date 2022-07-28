@@ -811,7 +811,7 @@ public class GameSystemManager : MonoBehaviour
             {
                 load_dungeon.hierarchy_list[item.hierarchy_idx].mapInfos_of_layer[item.layer_idx][item.map_idx].item_list.Add(new ItemInfo(item.pos_x, item.pos_y, item.item_type, item.specific_item_type, item.item_name, item.enchant_cnt, item.hierarchy_idx, item.layer_idx, item.map_idx));
             }
-            this.player_info = new PlayerInfo(data.player_info.hierarchy_idx, data.player_info.layer_idx, data.player_info.map_idx, data.player_info.max_hp, data.player_info.cur_hp, data.player_info.attack_pt, data.player_info.pos_x, data.player_info.pos_y, data.player_info.item_list);
+            this.player_info = new PlayerInfo(data.player_info.hierarchy_idx, data.player_info.layer_idx, data.player_info.map_idx, data.player_info.max_hp, data.player_info.cur_hp, data.player_info.attack_pt, data.player_info.pos_x, data.player_info.pos_y, data.player_info.item_list, data.player_info.hunger);
             this.dungeon = load_dungeon;
             this.cur_map_info = this.dungeon.hierarchy_list[this.player_info.hierarchy_idx].mapInfos_of_layer[this.player_info.layer_idx][this.player_info.map_idx];
             this.terrain_info_arr = (TerrainInfo[,])this.cur_map_info.terrain_info_arr.Clone();
