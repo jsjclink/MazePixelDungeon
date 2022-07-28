@@ -1,3 +1,4 @@
 # Maze Pixel Dungeon
 
-https://github.com/jsjclink/MazePixelDungeon/wiki 도 읽어주세요!
+게임 내에 보이지 않는 내용들에 대한 설명은
+https://github.com/jsjclink/MazePixelDungeon/wiki 에 있습니다!
